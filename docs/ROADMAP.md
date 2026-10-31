@@ -31,7 +31,7 @@
 - [ ] Android upload keystore
 - [ ] TestFlight and Google Play internal testing
 - [x] App Store listing draft and screenshots (`docs/store/APP_STORE.md`)
-- [ ] Publish the app privacy policy on pontecesures.net
+- [x] Publish the app privacy policy (https://pontecesures.net/privacidad-app/)
 - [ ] CI builds (GitHub Actions)
 
 ## Phase 3 — Optional user accounts (last)

@@ -16,7 +16,7 @@ App Store Connect's (in brackets).
 | Secondary category | Weather (Tiempo) |
 | Content rights | The app shows third-party content: **yes**, and the developer has the rights (owner of pontecesures.net since 2005) |
 | Age rating | No unrestricted web access (external links open in Safari), no user-generated content, no messaging or ads. Local news can mention accidents or crimes without graphic content: answer "Infrequent/Mild" to realistic violence only if the questionnaire asks |
-| Privacy policy URL | `https://pontecesures.net/colaborar/privacidade-app/` (to be published, text below) |
+| Privacy policy URL | `https://pontecesures.net/privacidad-app/` (published 2026-10-31) |
 | Support URL | `https://pontecesures.net/colaborar/` |
 | Marketing URL | `https://pontecesures.net/` |
 | Copyright | `2026 Antonio Cortés (DrZippie)` |
@@ -109,32 +109,10 @@ The app is not a wrapped website: content is fetched from the site's public Word
 No account or login is needed. The app does not collect personal data, has no ads and no tracking. Articles are published in Galician.
 ```
 
-## Privacy policy (to publish on pontecesures.net)
+## Privacy policy
 
-Publish as a page under "Colaborar" with the slug `privacidade-app`, then
-use its URL above. Spanish text (the store's primary language):
-
-```
-Política de privacidad de la aplicación Pontecesures.net
-
-Última actualización: 31 de octubre de 2026
-
-La aplicación Pontecesures.net para iOS y Android (en adelante, «la aplicación») es un proyecto de Antonio Cortés (DrZippie), responsable de pontecesures.net. Contacto: admin@pontecesures.net.
-
-Qué datos recogemos
-La aplicación no recoge, almacena ni comparte datos personales. No necesita cuenta, no tiene publicidad, no usa herramientas de analítica ni de seguimiento y no incluye servicios de terceros que lo hagan.
-
-Qué se guarda en tu dispositivo
-Para que puedas leer sin conexión, la aplicación guarda en tu propio dispositivo una copia de las noticias que abres, las noticias que marcas como guardadas y tus preferencias (idioma, apariencia y tamaño del texto). Estos datos no salen de tu dispositivo y se borran al desinstalar la aplicación.
-
-Conexiones que hace la aplicación
-• pontecesures.net, para descargar las noticias públicas de la web.
-• MeteoGalicia (Xunta de Galicia), para descargar la previsión del tiempo de Pontecesures.
-Como en cualquier conexión a internet, estos servidores reciben la dirección IP de tu dispositivo para poder responder. La aplicación no les envía ningún otro dato sobre ti.
-
-Enlaces externos
-Los enlaces a otras webs se abren en el navegador de tu dispositivo y se rigen por las políticas de esas webs.
-
-Cambios
-Si en el futuro la aplicación permite crear una cuenta, actualizaremos esta política antes de publicar esa versión e indicaremos qué datos se tratan y cómo eliminarlos.
-```
+Published at https://pontecesures.net/privacidad-app/ (WordPress page
+192198). Keep it in line with what the app does: it must mention every
+server the app talks to (pontecesures.net and MeteoGalicia) and what is
+stored on the device (cached content, saved articles, display
+preferences). Update it before releasing user accounts.
