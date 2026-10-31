@@ -156,10 +156,11 @@ What the build adds compared with `device:ios`:
 `ITSAppUsesNonExemptEncryption` false (HTTPS only).
 
 The Wails runtime always links its optional mobile features (location,
-camera torch, image picker, motion, biometrics). If App Store Connect reports
-missing purpose strings (ITMS-90683) for them, add the keys listed in the
-commented block of `Info.plist` with an honest text, even though the app
-never requests those permissions.
+camera torch, image picker, motion, biometrics). App Store Connect flagged
+only location (ITMS-90683 on build 261031.1814), so `Info.plist` has a
+`NSLocationWhenInUseUsageDescription` saying the app does not use it. If
+another key is reported, add it the same way (an honest text; the app never
+requests those permissions).
 
 Uploading: `store:ios:upload` needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and
 `~/.appstoreconnect/private_keys/AuthKey_<ASC_KEY_ID>.p8`; alternatively drag

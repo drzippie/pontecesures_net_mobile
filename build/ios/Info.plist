@@ -61,6 +61,11 @@
          every upload. -->
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
+    <!-- Required by App Store Connect (ITMS-90683) because the Wails runtime
+         links CoreLocation, even though this app never asks for the user's
+         location (the forecast is always for Pontecesures). -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Pontecesures.net no usa tu ubicación: el tiempo que muestra es siempre el de Pontecesures.</string>
     
     <!--
       Privacy usage descriptions. iOS hard-crashes (and the App Store rejects the
