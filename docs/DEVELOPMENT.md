@@ -128,8 +128,13 @@ uses — `https://servizos.meteogalicia.gal/mgrss/predicion/jsonPredConcellos.ac
 - Go returns codes; Spanish texts live in `frontend/src/lib/weather.ts`
   (annex II sky codes 101–125 day / 201–225 night, annex III wind 299–332).
   Icons are MeteoGalicia's official SVGs
-  (`https://www.meteogalicia.gal/web/assets/icons/svg/<code>.svg`), so they
-  need a connection; the text is always shown.
+  (`https://www.meteogalicia.gal/web/assets/icons/svg/<code>.svg`). They are
+  not shipped in the repo: `meteo.IconStore` serves them under
+  `/meteo/icons/<code>.svg` through an asset-server middleware, downloading
+  each one once into `<storage>/meteo-icons/` and serving it from disk
+  afterwards. Every fresh forecast prefetches its icons in the background,
+  so the weather view works offline before it is ever opened. Only annex II
+  codes are accepted and responses must be real SVGs.
 - UI: one discreet line on the front page (today's icon, max/min, max rain
   probability) that opens `#/tiempo` with today's slots, UV index, next days,
   active warnings and the attribution.

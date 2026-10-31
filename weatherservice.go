@@ -11,6 +11,8 @@ import (
 // WeatherService exposes the MeteoGalicia forecast for Pontecesures.
 type WeatherService struct {
 	client *meteo.Client
+	// icons is shared with the asset server middleware (main.go).
+	icons *meteo.IconStore
 }
 
 // ServiceStartup initialises the MeteoGalicia client.
@@ -26,5 +28,10 @@ func (s *WeatherService) ServiceStartup(ctx context.Context, _ application.Servi
 func (s *WeatherService) Forecast() (meteo.Forecast, error) {
 	ctx, cancel := reqCtx()
 	defer cancel()
-	return s.client.Forecast(ctx, meteo.PontecesuresID)
+	f, err := s.client.Forecast(ctx, meteo.PontecesuresID)
+	if err == nil && s.icons != nil && !f.Stale {
+		// Download this forecast's icons now so they also show offline.
+		go s.icons.Prefetch(f)
+	}
+	return f, err
 }

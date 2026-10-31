@@ -44,9 +44,12 @@ export function skyText(code: number | null | undefined): string {
   return SKY_DAY[code] ?? "";
 }
 
-/** Official MeteoGalicia SVG icon for a sky code. */
+/**
+ * Official MeteoGalicia SVG icon for a sky code, served by the app itself
+ * (Go caches it on disk: internal/meteo/icons.go) so it works offline.
+ */
 export function skyIcon(code: number | null | undefined): string {
-  return code == null ? "" : `https://www.meteogalicia.gal/web/assets/icons/svg/${code}.svg`;
+  return code == null ? "" : `/meteo/icons/${code}.svg`;
 }
 
 const WIND_DIR = ["del norte", "del nordeste", "del este", "del sudeste", "del sur", "del sudoeste", "del oeste", "del noroeste"];

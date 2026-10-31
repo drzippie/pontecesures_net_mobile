@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+
+	"github.com/drzippie/pontecesures_net_mobile/internal/meteo"
 )
 
 // appVersion is reported in the User-Agent sent to pontecesures.net.
@@ -26,15 +28,21 @@ var chromeColour = application.NewRGB(27, 58, 75)
 var groundColour = application.NewRGB(247, 246, 243)
 
 func main() {
+	userAgent := "PontecesuresNetMobile/" + appVersion + " (+https://pontecesures.net)"
+	// MeteoGalicia sky icons are cached on disk and served by the app itself
+	// under /meteo/icons/, so the weather view also works offline.
+	icons := meteo.NewIconStore(func() string { return cacheDir("meteo-icons") }, userAgent)
+
 	opts := application.Options{
 		Name:        "Pontecesures.net",
 		Description: "Las noticias de Pontecesures en tu móvil",
 		Services: []application.Service{
 			application.NewService(&ContentService{}),
-			application.NewService(&WeatherService{}),
+			application.NewService(&WeatherService{icons: icons}),
 		},
 		Assets: application.AssetOptions{
-			Handler: application.AssetFileServerFS(assets),
+			Handler:    application.AssetFileServerFS(assets),
+			Middleware: icons.Middleware,
 		},
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
