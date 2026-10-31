@@ -78,6 +78,8 @@ Alpine.data("app", () => ({
   searchTimer: undefined as number | undefined,
 
   article: { id: 0, data: null as Post | PostSummary | null, full: false, loading: false, error: "" },
+  /** "Más sobre esto" under the open article. */
+  related: { id: 0, items: [] as PostSummary[], loading: false },
   toast: "",
   toastTimer: undefined as number | undefined,
 
@@ -226,6 +228,7 @@ Alpine.data("app", () => ({
     if (this.article.id !== id) {
       this.article = { id, data: null, full: false, loading: true, error: "" };
     }
+    this.loadRelated(id);
     this.$nextTick(() => {
       const el = this.$refs.articleScroll as HTMLElement | undefined;
       if (el) el.scrollTop = 0;
@@ -235,6 +238,18 @@ Alpine.data("app", () => ({
       if (this.article.id === id) this.article = { id, data: post, full: true, loading: false, error: "" };
     } catch (err) {
       if (this.article.id === id) Object.assign(this.article, { loading: false, error: errorText(err) });
+    }
+  },
+
+  async loadRelated(id: number) {
+    if (this.related.id === id && (this.related.loading || this.related.items.length)) return;
+    this.related = { id, items: [], loading: true };
+    try {
+      const items = (await ContentService.Related(id)) ?? [];
+      if (this.related.id === id) this.related = { id, items, loading: false };
+    } catch {
+      // Related posts are optional: just leave the section out.
+      if (this.related.id === id) this.related.loading = false;
     }
   },
 

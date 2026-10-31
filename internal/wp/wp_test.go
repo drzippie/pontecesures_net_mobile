@@ -97,3 +97,75 @@ func TestOfflineFallback(t *testing.T) {
 		t.Fatalf("offline: %+v %v", p, err)
 	}
 }
+
+func TestRelatedFallsBackWithoutPlugin(t *testing.T) {
+	var pluginHits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		switch {
+		case strings.HasPrefix(r.URL.Path, "/wp-json/pcn/v1/"):
+			pluginHits++
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"code":"rest_no_route"}`))
+		case r.URL.Path == "/wp-json/wp/v2/posts/10":
+			_, _ = w.Write([]byte(`{"tags":[1,2,3],"categories":[24]}`))
+		case r.URL.Path == "/wp-json/wp/v2/tags":
+			// Tag 1 is generic and must be dropped; 3 is rarer than 2.
+			_, _ = w.Write([]byte(`[{"id":1,"count":3906},{"id":2,"count":42},{"id":3,"count":5}]`))
+		case r.URL.Path == "/wp-json/wp/v2/posts" && q.Get("tags") == "3":
+			// Rarest tag first.
+			if q.Get("exclude") != "10" || q.Get("per_page") != "4" {
+				t.Errorf("rare tag query = %v", q)
+			}
+			_, _ = w.Write([]byte(`[{"id":11,"title":{"rendered":"Etiqueta rara"}}]`))
+		case r.URL.Path == "/wp-json/wp/v2/posts" && q.Get("tags") == "2":
+			if q.Get("exclude") != "10,11" || q.Get("per_page") != "3" {
+				t.Errorf("second tag query = %v", q)
+			}
+			_, _ = w.Write([]byte(`[{"id":13,"title":{"rendered":"Outra etiqueta"}}]`))
+		case r.URL.Path == "/wp-json/wp/v2/posts" && q.Get("categories") != "":
+			if q.Get("exclude") != "10,11,13" || q.Get("per_page") != "2" {
+				t.Errorf("category query = %v", q)
+			}
+			_, _ = w.Write([]byte(`[{"id":12,"title":{"rendered":"Por sección"}}]`))
+		default:
+			t.Errorf("unexpected request %s", r.URL)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	c := NewClient(Options{BaseURL: srv.URL})
+	got, err := c.Related(context.Background(), 10, 4)
+	if err != nil || len(got) != 3 || got[0].ID != 11 || got[1].ID != 13 || got[2].ID != 12 {
+		t.Fatalf("Related = %+v, %v", got, err)
+	}
+	// The missing plugin route is remembered.
+	_, _ = c.Related(context.Background(), 10, 4)
+	if pluginHits != 1 {
+		t.Fatalf("plugin endpoint hit %d times, want 1", pluginHits)
+	}
+}
+
+func TestRelatedUsesPluginOrder(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/wp-json/pcn/v1/posts/10/related":
+			_, _ = w.Write([]byte(`{"ids":[30,20]}`))
+		case "/wp-json/wp/v2/posts":
+			q := r.URL.Query()
+			if q.Get("include") != "30,20" || q.Get("orderby") != "include" {
+				t.Errorf("include query = %v", q)
+			}
+			_, _ = w.Write([]byte(`[{"id":30},{"id":20}]`))
+		default:
+			t.Errorf("unexpected request %s", r.URL)
+		}
+	}))
+	defer srv.Close()
+
+	got, err := NewClient(Options{BaseURL: srv.URL}).Related(context.Background(), 10, 4)
+	if err != nil || len(got) != 2 || got[0].ID != 30 {
+		t.Fatalf("Related = %+v, %v", got, err)
+	}
+}

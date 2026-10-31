@@ -19,11 +19,13 @@ const PCN_MOBILE_VERSION   = '0.1.0';
 const PCN_MOBILE_NAMESPACE = 'pcn/v1';
 
 require_once __DIR__ . '/includes/class-illustrations.php';
+require_once __DIR__ . '/includes/class-related.php';
 
 add_action(
 	'rest_api_init',
 	static function () {
 		PcnMobile\Illustrations::register_routes();
+		PcnMobile\Related::register_routes();
 		// Authentication and registration endpoints (pcn/v1/auth/*) will be
 		// added here in a later phase. See README.md.
 	}

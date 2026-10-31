@@ -204,6 +204,33 @@
           <button type="button" class="mt-8 w-full rounded-xl border border-line py-3 font-semibold text-verdemar active:bg-line-soft"
                   @click="openExternal(article.data.link)" x-text="t.article.openWeb"></button>
         </div>
+
+        <!-- Related posts ("Más sobre esto"), same idea as the website footer -->
+        <section class="px-4 mt-10" x-show="article.full && related.id === article.data.id && (related.loading || related.items.length)">
+          <h2 class="font-display text-xl font-bold mb-3" x-text="t.article.related"></h2>
+          <div class="space-y-3">
+            <template x-for="p in related.items" :key="p.id">
+              <button type="button" class="flex w-full gap-3 rounded-xl bg-surface border border-line-soft p-2.5 text-left shadow-sm active:scale-[.99] transition-transform"
+                      @click="showPost(p)">
+                <span class="size-20 shrink-0 overflow-hidden rounded-lg bg-line-soft">
+                  <template x-if="p.image">
+                    <img :src="p.image.url" :alt="p.image.alt" loading="lazy" decoding="async" class="size-full object-cover" @error="$el.remove()" />
+                  </template>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-[.7rem] font-semibold uppercase tracking-wider text-tella" x-text="mainCategory(p)"></span>
+                  <span class="mt-0.5 block font-display font-semibold leading-snug line-clamp-3" x-text="p.title"></span>
+                  <span class="mt-1 block text-xs text-muted" x-text="when(p)"></span>
+                </span>
+              </button>
+            </template>
+            <template x-if="related.loading">
+              <div class="space-y-3 animate-pulse">
+                <div class="h-24 rounded-xl bg-line-soft"></div><div class="h-24 rounded-xl bg-line-soft"></div>
+              </div>
+            </template>
+          </div>
+        </section>
       </article>
     </template>
 

@@ -41,6 +41,7 @@ export const es = {
     openWeb: "Ver en pontecesures.net",
     by: "Por {author}",
     loading: "Cargando noticia…",
+    related: "Más sobre esto",
   },
 
   more: {

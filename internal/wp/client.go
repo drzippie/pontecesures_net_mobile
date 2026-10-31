@@ -29,6 +29,7 @@ type Client struct {
 	http      *http.Client
 	cache     *fileCache
 	userAgent string
+	pcn       pcnState
 }
 
 // Options configures a Client.

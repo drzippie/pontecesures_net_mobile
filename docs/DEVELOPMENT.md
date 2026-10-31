@@ -99,6 +99,22 @@ The mapping lives in `internal/wp/images.go`. The plugin exposes the same
 data at `GET /wp-json/pcn/v1/illustrations` so the app can fetch it once the
 plugin is deployed — keep both in sync with the theme until then.
 
+## Related posts
+
+Under each article the app shows "Más sobre esto" (4 posts), like the
+website's "Máis sobre isto".
+
+- **Preferred:** `GET /pcn/v1/posts/{id}/related` from the `pcn-mobile`
+  plugin returns the IDs computed by the site itself
+  (`pontecesures_novas_relacionadas()` in the `comments` plugin: tags weighted
+  by rarity, recency bonus, same-category top-up).
+- **Fallback** (plugin not installed — the route answers 404 and the client
+  stops asking for 6 hours): `internal/wp/related.go` queries the post's
+  specific tags (fewer than 1,500 posts) one by one from the rarest to the most
+  common, newest first, then tops up with the latest posts of the same
+  category. Posts tagged only with generic tags ("Pontecesures", "Concello")
+  get recent posts of those tags, which is also what the website does.
+
 ## Frontend
 
 - Hash router (`src/lib/router.ts`): `#/`, `#/seccion/:id`, `#/secciones`,

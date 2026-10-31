@@ -58,6 +58,13 @@ export function Posts(page: number, categoryID: number, search: string): $Cancel
 }
 
 /**
+ * Related returns the posts shown under an article ("Más sobre esto").
+ */
+export function Related(id: number): $CancellablePromise<wp$0.PostSummary[] | null> {
+    return $Call.ByID(2167280891, id);
+}
+
+/**
  * SafeArea returns the raw system bar insets (physical pixels on Android,
  * points on iOS; zero on desktop). Android's WebView does not expose them
  * through CSS env(safe-area-inset-*) when drawing edge-to-edge, so the

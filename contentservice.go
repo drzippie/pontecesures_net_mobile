@@ -154,3 +154,14 @@ func (s *ContentService) SafeArea() Insets {
 	_ = json.Unmarshal([]byte(application.Mobile.SafeAreaJSON()), &in)
 	return in
 }
+
+// relatedCount is how many related posts are shown under an article (same as
+// the website).
+const relatedCount = 4
+
+// Related returns the posts shown under an article ("Más sobre esto").
+func (s *ContentService) Related(id int) ([]wp.PostSummary, error) {
+	ctx, cancel := reqCtx()
+	defer cancel()
+	return s.client.Related(ctx, id, relatedCount)
+}

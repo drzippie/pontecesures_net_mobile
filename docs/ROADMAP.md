@@ -8,10 +8,12 @@
 - [x] Front page, sections, search, article view
 - [x] Image cascade and orientation rules from the website theme
 - [x] Offline cache, internal link handling, share
+- [x] Related posts under each article ("Más sobre esto")
 - [x] Verify on iOS Simulator (iOS 18.3) and Android Emulator (API 35)
 - [ ] App icon and launch screen
 - [ ] Pull-to-refresh gesture
 - [ ] Fetch the illustration mapping from `pcn/v1/illustrations` once deployed
+- [ ] Deploy `pcn-mobile` so related posts match the website exactly
 
 ## Phase 2 — Store release
 - [ ] Signing (Xcode automatic signing; Android upload keystore)
