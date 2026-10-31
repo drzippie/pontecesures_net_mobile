@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Design tokens copied from the pontecesures.net theme
+ * (wp-content/themes/pontecesures/assets/css). Light values first, dark
+ * values under prefers-color-scheme.
+ */
+:root {
+  --estuario: #1b3a4b;
+  --ground: #f7f6f3;
+  --surface: #ffffff;
+  --ink: #14212b;
+  --muted: #5e6b75;
+  --line: #dddcd6;
+  --line-soft: #eae9e3;
+  --tella: #c15f3c;
+  --verdemar: #2e7d8f;
+  --granate: #8c5a6b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --estuario: #0e1c24;
+    --ground: #0f1a20;
+    --surface: #16242c;
+    --ink: #e8edef;
+    --muted: #9ba9b2;
+    --line: #26353e;
+    --line-soft: #1d2c34;
+    --tella: #e08a64;
+    --verdemar: #6fb6c4;
+    --granate: #c08fa0;
+  }
+}
+
+@theme inline {
+  --color-estuario: var(--estuario);
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-tella: var(--tella);
+  --color-verdemar: var(--verdemar);
+  --color-granate: var(--granate);
+
+  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-sans: "Source Sans 3 Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-ground text-ink font-sans antialiased;
+    overscroll-behavior-y: none;
+  }
+  [x-cloak] {
+    display: none !important;
+  }
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Article body: WordPress HTML rendered with the typography plugin. */
+.post-body {
+  @apply prose prose-lg max-w-none font-sans;
+  --tw-prose-body: var(--ink);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-links: var(--verdemar);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-quotes: var(--muted);
+  --tw-prose-quote-borders: var(--tella);
+  --tw-prose-captions: var(--muted);
+  --tw-prose-bullets: var(--muted);
+  --tw-prose-counters: var(--muted);
+  --tw-prose-hr: var(--line);
+
+  & h1,
+  & h2,
+  & h3 {
+    @apply font-display;
+  }
+  & a {
+    @apply break-words;
+  }
+  & img {
+    @apply rounded-lg mx-auto h-auto;
+  }
+  /* Same rule as the website: landscape photos fill the width; posters and
+     obituaries are shown whole. */
+  & img.e-apaisada {
+    @apply w-full;
+  }
+  & img.e-vertical {
+    @apply max-h-[80vh] w-auto object-contain;
+  }
+  & iframe {
+    @apply w-full aspect-video rounded-lg;
+  }
+  & figure {
+    @apply my-6;
+  }
+}

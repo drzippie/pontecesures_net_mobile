@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=Pontecesures.net
+Comment=Novas de Pontecesures
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/pontecesures_net_mobile %u
+Terminal=false
+Type=Application
+Icon=pontecesures_net_mobile
+Categories=Utility;
+StartupWMClass=pontecesures_net_mobile
+
+ 

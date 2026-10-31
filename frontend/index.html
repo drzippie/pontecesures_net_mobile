@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Pontecesures.net</title>
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body x-data="app" x-cloak>
+
+  <!-- ===== Masthead ===== -->
+  <header class="sticky top-0 z-30 bg-estuario text-white pt-safe shadow-sm">
+    <div class="flex items-center gap-3 px-4 h-13">
+      <button type="button" class="flex items-baseline gap-2 font-display font-bold text-[1.32rem] tracking-tight"
+              @click="go({ name: 'home' }); window.scrollTo({ top: 0, behavior: 'smooth' })">
+        <span>Pontecesures<span class="text-tella">.</span>net</span>
+        <small class="font-sans font-normal text-[.62rem] uppercase tracking-[.14em] opacity-70" x-text="t.since"></small>
+      </button>
+      <button type="button" class="ml-auto p-2 -mr-2 rounded-full active:bg-white/10" x-show="isListView && base.name !== 'search'"
+              :aria-label="t.feed.refresh" @click="refresh()">
+        <svg class="size-5" :class="list.loading && 'animate-spin'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </button>
+    </div>
+
+    <!-- Section chips (portada / sección) -->
+    <nav class="flex gap-2 overflow-x-auto no-scrollbar px-4 pb-3" x-show="(base.name === 'home' || base.name === 'section') && categories.length">
+      <a :href="'#/'" class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors"
+         :class="currentCategory === 0 ? 'bg-white text-estuario' : 'bg-white/10 text-white'" x-text="t.feed.all"></a>
+      <template x-for="c in categories.slice(0, 14)" :key="c.id">
+        <a :href="'#/seccion/' + c.id" class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors"
+           :class="currentCategory === c.id ? 'bg-white text-estuario' : 'bg-white/10 text-white'" x-text="c.name"
+           x-effect="currentCategory === c.id && $el.scrollIntoView({ inline: 'center', block: 'nearest' })"></a>
+      </template>
+    </nav>
+  </header>
+
+  <main class="pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
+
+    <!-- ===== Search box ===== -->
+    <div x-show="base.name === 'search'" class="px-4 pt-4">
+      <label class="flex items-center gap-2 rounded-xl bg-surface border border-line px-3 h-12 focus-within:border-verdemar">
+        <svg class="size-5 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input x-ref="searchInput" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off"
+               class="flex-1 bg-transparent outline-none text-base placeholder:text-muted"
+               :placeholder="t.search.placeholder" x-model="search.q" @input="onSearchInput()" @keydown.enter="$el.blur()" />
+        <button type="button" x-show="search.q" @click="clearSearch()" class="p-1 text-muted" :aria-label="t.search.clear">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </label>
+      <p class="mt-3 text-sm text-muted" x-show="search.q.trim().length < 3" x-text="t.search.hint"></p>
+      <p class="mt-3 text-sm text-muted" x-show="search.ran && search.total > 0"
+         x-text="fmt(t.search.results, { n: number(search.total) })"></p>
+      <p class="mt-6 text-center text-muted" x-show="search.ran && !search.loading && !search.error && search.items.length === 0"
+         x-text="fmt(t.search.noResults, { q: search.ran })"></p>
+    </div>
+
+    <!-- ===== Post list (portada, sección, búsqueda) ===== -->
+    <section x-show="isListView" class="px-4 pt-4 space-y-4">
+      <h1 x-show="base.name === 'section' && sectionName" class="font-display text-2xl font-bold" x-text="sectionName"></h1>
+
+      <div x-show="list.stale" class="rounded-lg bg-tella/10 text-tella text-sm px-3 py-2" x-text="t.offline"></div>
+
+      <template x-for="(p, i) in list.items" :key="p.id">
+        <article class="rounded-2xl bg-surface shadow-sm border border-line-soft overflow-hidden active:scale-[.99] transition-transform">
+          <button type="button" class="block w-full text-left" @click="showPost(p)">
+            <template x-if="p.image">
+              <div class="bg-line-soft" :class="p.image.landscape ? 'aspect-[16/9]' : 'flex justify-center'">
+                <img :src="p.image.url" :alt="p.image.alt" loading="lazy" decoding="async"
+                     :class="p.image.landscape ? 'size-full object-cover' : 'max-h-[26rem] w-auto object-contain'"
+                     :width="p.image.width || null" :height="p.image.height || null"
+                     @error="$el.parentElement.classList.add('hidden')" />
+              </div>
+            </template>
+            <div class="p-4">
+              <p class="text-xs font-semibold uppercase tracking-wider text-tella" x-text="mainCategory(p)"></p>
+              <h2 class="mt-1 font-display font-semibold leading-snug" :class="i === 0 && base.name === 'home' ? 'text-2xl' : 'text-xl'" x-text="p.title"></h2>
+              <p class="mt-2 text-[.95rem] leading-relaxed text-muted line-clamp-3" x-show="p.excerpt" x-text="p.excerpt"></p>
+              <p class="mt-3 text-xs text-muted">
+                <span x-text="when(p)"></span><template x-if="p.author"><span> · <span x-text="p.author"></span></span></template>
+              </p>
+            </div>
+          </button>
+        </article>
+      </template>
+
+      <!-- Loading / error / end -->
+      <div class="py-6 text-center text-sm text-muted">
+        <template x-if="list.loading">
+          <div class="flex items-center justify-center gap-2">
+            <span class="size-4 rounded-full border-2 border-verdemar border-t-transparent animate-spin"></span>
+            <span x-text="list.items.length ? t.feed.loadingMore : t.feed.loading"></span>
+          </div>
+        </template>
+        <template x-if="!list.loading && list.error">
+          <div class="space-y-3">
+            <p x-text="list.error"></p>
+            <button type="button" class="rounded-full bg-estuario text-white px-4 py-2 font-semibold" @click="loadMore()" x-text="t.error.retry"></button>
+          </div>
+        </template>
+        <template x-if="!list.loading && !list.error && list.page > 0 && list.page >= list.totalPages && list.items.length">
+          <p x-text="t.feed.end"></p>
+        </template>
+        <template x-if="!list.loading && !list.error && list.page > 0 && !list.items.length && base.name !== 'search'">
+          <p x-text="t.feed.empty"></p>
+        </template>
+        <!-- Infinite scroll sentinel -->
+        <div x-ref="sentinel" x-intersect:enter.margin.600px="list.page > 0 && loadMore()" class="h-px"></div>
+      </div>
+    </section>
+
+    <!-- ===== Sections grid ===== -->
+    <section x-show="base.name === 'sections'" class="px-4 pt-4">
+      <h1 class="font-display text-2xl font-bold mb-4" x-text="t.sections.title"></h1>
+      <div class="grid grid-cols-2 gap-3">
+        <template x-for="c in categories" :key="c.id">
+          <a :href="'#/seccion/' + c.id" class="relative aspect-[4/3] overflow-hidden rounded-xl bg-estuario text-white shadow-sm active:scale-[.98] transition-transform">
+            <img :src="c.illustration" alt="" loading="lazy" class="absolute inset-0 size-full object-cover opacity-80" @error="$el.remove()" />
+            <span class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></span>
+            <span class="absolute bottom-0 p-3">
+              <span class="block font-display font-semibold text-lg leading-tight" x-text="c.name"></span>
+              <span class="block text-xs opacity-80" x-text="fmt(t.sections.posts, { n: number(c.count) })"></span>
+            </span>
+          </a>
+        </template>
+      </div>
+      <div x-show="!categories.length" class="py-10 text-center text-muted">
+        <button type="button" class="rounded-full bg-estuario text-white px-4 py-2 font-semibold" @click="loadCategories()" x-text="t.error.retry"></button>
+      </div>
+    </section>
+
+    <!-- ===== More ===== -->
+    <section x-show="base.name === 'more'" class="px-4 pt-4 space-y-6">
+      <h1 class="font-display text-2xl font-bold" x-text="t.more.title"></h1>
+      <p class="leading-relaxed" x-text="t.more.about"></p>
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted mb-2" x-text="t.more.links"></h2>
+        <ul class="rounded-xl bg-surface border border-line-soft divide-y divide-line-soft overflow-hidden">
+          <template x-for="l in [
+              { label: t.more.website, path: '/' },
+              { label: t.more.weather, path: '/o-tempo-en-pontecesures/' },
+              { label: t.more.collaborate, path: '/colaborar/' },
+              { label: t.more.rules, path: '/normas/' },
+              { label: t.more.legal, path: '/legal/' },
+            ]" :key="l.path">
+            <li>
+              <button type="button" class="flex w-full items-center justify-between px-4 py-3.5 text-left active:bg-line-soft" @click="openSite(l.path)">
+                <span x-text="l.label"></span>
+                <svg class="size-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+              </button>
+            </li>
+          </template>
+        </ul>
+      </div>
+      <p class="text-center text-xs text-muted" x-text="fmt(t.more.version, { v: version })"></p>
+    </section>
+  </main>
+
+  <!-- ===== Article overlay ===== -->
+  <div x-show="route.name === 'article'" x-ref="articleScroll"
+       x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+       x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+       class="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground">
+    <div class="sticky top-0 z-10 bg-estuario/95 backdrop-blur text-white pt-safe">
+      <div class="flex items-center justify-between px-2 h-13">
+        <button type="button" class="flex items-center gap-1 px-2 py-2 rounded-full active:bg-white/10" @click="back()">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          <span class="font-semibold" x-text="t.article.back"></span>
+        </button>
+        <button type="button" class="p-2 rounded-full active:bg-white/10" :aria-label="t.article.share" @click="share()" x-show="article.data">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <template x-if="article.data">
+      <article class="pb-[calc(2rem+env(safe-area-inset-bottom))]">
+        <!-- Photos already appear in the body; only the section illustration is used as a header. -->
+        <template x-if="article.data.image && (article.data.image.fallback || !article.full)">
+          <div class="bg-line-soft" :class="article.data.image.landscape ? 'aspect-[16/9]' : 'flex justify-center'">
+            <img :src="article.data.image.url" :alt="article.data.image.alt"
+                 :class="article.data.image.landscape ? 'size-full object-cover' : 'max-h-[70vh] w-auto object-contain'" />
+          </div>
+        </template>
+        <div class="px-4 pt-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-tella" x-text="mainCategory(article.data)"></p>
+          <h1 class="mt-1 font-display text-[1.75rem] font-bold leading-tight" x-text="article.data.title"></h1>
+          <p class="mt-3 text-sm text-muted">
+            <span class="first-letter:uppercase inline-block" x-text="longDate(article.data.date)"></span>
+            <template x-if="article.data.author"><span class="block" x-text="fmt(t.article.by, { author: article.data.author })"></span></template>
+          </p>
+
+          <!-- Body -->
+          <template x-if="article.full">
+            <div class="post-body mt-6" x-html="article.data.content" @click="onContentClick($event)"></div>
+          </template>
+          <template x-if="!article.full && article.loading">
+            <div class="mt-6 space-y-3 animate-pulse" :aria-label="t.article.loading">
+              <div class="h-4 rounded bg-line"></div><div class="h-4 rounded bg-line w-11/12"></div>
+              <div class="h-4 rounded bg-line w-10/12"></div><div class="h-4 rounded bg-line w-9/12"></div>
+            </div>
+          </template>
+
+          <button type="button" class="mt-8 w-full rounded-xl border border-line py-3 font-semibold text-verdemar active:bg-line-soft"
+                  @click="openExternal(article.data.link)" x-text="t.article.openWeb"></button>
+        </div>
+      </article>
+    </template>
+
+    <template x-if="!article.data && article.loading">
+      <div class="flex items-center justify-center gap-2 py-16 text-muted">
+        <span class="size-4 rounded-full border-2 border-verdemar border-t-transparent animate-spin"></span>
+        <span x-text="t.article.loading"></span>
+      </div>
+    </template>
+    <template x-if="article.error">
+      <div class="px-4 py-10 text-center space-y-3">
+        <p x-text="article.error"></p>
+        <button type="button" class="rounded-full bg-estuario text-white px-4 py-2 font-semibold" @click="openArticle(article.id)" x-text="t.error.retry"></button>
+      </div>
+    </template>
+  </div>
+
+  <!-- ===== Bottom tab bar ===== -->
+  <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 backdrop-blur pb-safe">
+    <div class="grid grid-cols-4">
+      <template x-for="tab in [
+          { name: 'home', hash: '#/', label: t.tabs.home, icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
+          { name: 'sections', hash: '#/secciones', label: t.tabs.sections, icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
+          { name: 'search', hash: '#/buscar', label: t.tabs.search, icon: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5' },
+          { name: 'more', hash: '#/mas', label: t.tabs.more, icon: 'M5 12h.01M12 12h.01M19 12h.01' },
+        ]" :key="tab.name">
+        <a :href="tab.hash" class="flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[.7rem] font-semibold"
+           :class="isTab(tab.name) ? 'text-verdemar' : 'text-muted'"
+           @click="isTab(tab.name) && route.name !== 'article' && window.scrollTo({ top: 0, behavior: 'smooth' })">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="tab.icon"/></svg>
+          <span x-text="tab.label"></span>
+        </a>
+      </template>
+    </div>
+  </nav>
+
+  <!-- ===== Toast ===== -->
+  <div x-show="toast" x-transition.opacity role="status" aria-live="polite"
+       class="fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-50 flex justify-center pointer-events-none">
+    <span class="rounded-full bg-ink text-ground px-4 py-2 text-sm shadow-lg" x-text="toast"></span>
+  </div>
+</body>
+</html>
