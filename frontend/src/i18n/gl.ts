@@ -31,6 +31,11 @@ export const gl: Strings = {
     noResults: "Non atopamos nada para «{q}».",
     results: "{n} resultados",
     clear: "Borrar a busca",
+    allSections: "Todas as seccións",
+    section: "Sección",
+    order: "Orde",
+    relevance: "Relevancia",
+    newest: "Máis recentes",
   },
 
   sections: {

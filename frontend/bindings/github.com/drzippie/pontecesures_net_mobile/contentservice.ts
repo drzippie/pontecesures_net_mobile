@@ -52,10 +52,10 @@ export function PostByURL(link: string): $CancellablePromise<wp$0.Post> {
 
 /**
  * Posts returns a page of posts, optionally filtered by section and/or a
- * search term.
+ * search term. order is "relevance" or "date" (only relevant for searches).
  */
-export function Posts(page: number, categoryID: number, search: string): $CancellablePromise<wp$0.PostPage> {
-    return $Call.ByID(1593940411, page, categoryID, search);
+export function Posts(page: number, categoryID: number, search: string, order: string): $CancellablePromise<wp$0.PostPage> {
+    return $Call.ByID(1593940411, page, categoryID, search, order);
 }
 
 /**

@@ -154,6 +154,8 @@ type ListQuery struct {
 	PerPage    int
 	CategoryID int    // 0 = all
 	Search     string // empty = no search
+	// Order: "relevance" (only with Search) or "date" (default).
+	Order string
 }
 
 const postFields = "id,date,link,title,excerpt,content,_links,_embedded"
@@ -177,6 +179,10 @@ func (c *Client) Posts(ctx context.Context, lq ListQuery) (PostPage, error) {
 	}
 	if s := strings.TrimSpace(lq.Search); s != "" {
 		q.Set("search", s)
+		if lq.Order == "relevance" {
+			// Title matches first, then by date (WordPress core ranking).
+			q.Set("orderby", "relevance")
+		}
 	}
 
 	body, total, pages, stale, err := c.fetch(ctx, "/wp/v2/posts", q)

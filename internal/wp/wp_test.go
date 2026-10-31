@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -167,5 +168,25 @@ func TestRelatedUsesPluginOrder(t *testing.T) {
 	got, err := NewClient(Options{BaseURL: srv.URL}).Related(context.Background(), 10, 4)
 	if err != nil || len(got) != 2 || got[0].ID != 30 {
 		t.Fatalf("Related = %+v, %v", got, err)
+	}
+}
+
+func TestSearchOrderAndCategory(t *testing.T) {
+	var got url.Values
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = r.URL.Query()
+		_, _ = w.Write([]byte(`[]`))
+	}))
+	defer srv.Close()
+	c := NewClient(Options{BaseURL: srv.URL})
+
+	_, _ = c.Posts(context.Background(), ListQuery{Search: "samain", CategoryID: 341, Order: "relevance"})
+	if got.Get("orderby") != "relevance" || got.Get("categories") != "341" || got.Get("search") != "samain" {
+		t.Fatalf("query = %v", got)
+	}
+	// Relevance without a search term is invalid in WordPress: never sent.
+	_, _ = c.Posts(context.Background(), ListQuery{Order: "relevance"})
+	if got.Get("orderby") != "" {
+		t.Fatalf("orderby without search: %v", got)
 	}
 }

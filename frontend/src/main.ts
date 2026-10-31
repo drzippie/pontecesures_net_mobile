@@ -100,7 +100,7 @@ Alpine.data("app", () => ({
   /** Saved articles (offline reading). */
   savedList: emptyList(),
   savedIds: [] as number[],
-  search: { ...emptyList(), q: "", ran: "" },
+  search: { ...emptyList(), q: "", ran: "", category: 0, order: "relevance" as "relevance" | "date" },
   searchTimer: undefined as number | undefined,
 
   article: { id: 0, data: null as Post | PostSummary | null, full: false, loading: false, error: "" as ErrorKind },
@@ -307,9 +307,11 @@ Alpine.data("app", () => ({
     list.loading = true;
     list.error = "";
     try {
-      const res = await ContentService.Posts(list.page + 1, isSearch ? 0 : this.currentCategory, q);
-      // Ignore late answers to an outdated search.
-      if (isSearch && q !== this.search.q.trim()) return;
+      const category = isSearch ? this.search.category : this.currentCategory;
+      const order = isSearch ? this.search.order : "date";
+      const res = await ContentService.Posts(list.page + 1, category, q, order);
+      // Ignore late answers to an outdated search (text, section or order changed).
+      if (isSearch && (q !== this.search.q.trim() || category !== this.search.category || order !== this.search.order)) return;
       const seen = new Set(list.items.map((p) => p.id));
       list.items.push(...(res.items ?? []).filter((p) => !seen.has(p.id)));
       list.page = res.page;
@@ -345,6 +347,12 @@ Alpine.data("app", () => ({
       this.search.ran = "";
       this.loadMore();
     }, 350);
+  },
+
+  /** Section or order changed: run the search again from page 1. */
+  rerunSearch() {
+    Object.assign(this.search, emptyList(), { ran: "" });
+    this.loadMore();
   },
 
   clearSearch() {

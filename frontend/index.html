@@ -48,6 +48,29 @@
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </label>
+      <!-- Filters: section and order -->
+      <div class="mt-3 flex items-center gap-2">
+        <label class="relative min-w-0 flex-1">
+          <span class="sr-only" x-text="t.search.section"></span>
+          <select x-model.number="search.category" @change="rerunSearch()"
+                  class="h-10 w-full appearance-none truncate rounded-lg border border-line bg-surface pl-3 pr-8 text-sm text-ink">
+            <option value="0" x-text="t.search.allSections"></option>
+            <template x-for="c in categories" :key="c.id">
+              <option :value="c.id" x-text="c.name"></option>
+            </template>
+          </select>
+          <svg class="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </label>
+        <div class="flex shrink-0 rounded-lg bg-line-soft p-0.5" role="radiogroup" :aria-label="t.search.order">
+          <template x-for="o in ['relevance', 'date']" :key="o">
+            <button type="button" role="radio" :aria-checked="search.order === o"
+                    @click="if (search.order !== o) { search.order = o; rerunSearch() }"
+                    class="rounded-md px-2.5 py-1.5 text-xs font-semibold"
+                    :class="search.order === o ? 'bg-raised text-ink shadow-sm' : 'text-muted'"
+                    x-text="o === 'relevance' ? t.search.relevance : t.search.newest"></button>
+          </template>
+        </div>
+      </div>
       <p class="mt-3 text-sm text-muted" x-show="search.q.trim().length < 3" x-text="t.search.hint"></p>
       <p class="mt-3 text-sm text-muted" x-show="search.ran && search.total > 0"
          x-text="fmt(t.search.results, { n: number(search.total) })"></p>

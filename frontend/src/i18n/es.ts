@@ -30,6 +30,11 @@ export const es = {
     noResults: "No hemos encontrado nada para «{q}».",
     results: "{n} resultados",
     clear: "Borrar búsqueda",
+    allSections: "Todas las secciones",
+    section: "Sección",
+    order: "Orden",
+    relevance: "Relevancia",
+    newest: "Más recientes",
   },
 
   sections: {

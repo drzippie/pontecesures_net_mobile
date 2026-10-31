@@ -78,11 +78,11 @@ func (s *ContentService) Categories() ([]wp.Category, error) {
 }
 
 // Posts returns a page of posts, optionally filtered by section and/or a
-// search term.
-func (s *ContentService) Posts(page int, categoryID int, search string) (wp.PostPage, error) {
+// search term. order is "relevance" or "date" (only relevant for searches).
+func (s *ContentService) Posts(page int, categoryID int, search string, order string) (wp.PostPage, error) {
 	ctx, cancel := reqCtx()
 	defer cancel()
-	return s.client.Posts(ctx, wp.ListQuery{Page: page, CategoryID: categoryID, Search: search})
+	return s.client.Posts(ctx, wp.ListQuery{Page: page, CategoryID: categoryID, Search: search, Order: order})
 }
 
 // Post returns a full article. Saved articles are always readable offline,
