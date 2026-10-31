@@ -75,9 +75,6 @@ export const gl: Strings = {
 
   settings: {
     title: "Axustes",
-    account: "Conta",
-    guest: "Convidado",
-    accountSoon: "Axiña poderás crear unha conta e iniciar sesión dende a aplicación.",
     language: "Idioma",
     languageHint: "Cambia os textos da aplicación. As novas publícanse en galego.",
     languages: { es: "Español", gl: "Galego" },

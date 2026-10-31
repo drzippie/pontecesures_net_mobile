@@ -36,7 +36,7 @@
 
 ## Phase 3 — Optional user accounts (last)
 - [ ] `pcn/v1/auth/*` endpoints in the WordPress plugin
-- [ ] Login, registration, password reset, profile (in the Settings "Cuenta" block)
+- [ ] Login, registration, password reset, profile (new "Cuenta" block at the top of Settings; hidden until then because App Review rejects "coming soon" features)
 - [ ] In-app account deletion (App Store requirement)
 - [ ] Token stored only in Go via `application.Mobile.SecureSet`
 

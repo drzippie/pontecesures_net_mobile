@@ -75,9 +75,6 @@ export const es = {
 
   settings: {
     title: "Ajustes",
-    account: "Cuenta",
-    guest: "Invitado",
-    accountSoon: "Próximamente podrás crear una cuenta e iniciar sesión desde la aplicación.",
     language: "Idioma",
     languageHint: "Cambia los textos de la aplicación. Las noticias se publican en gallego.",
     languages: { es: "Español", gl: "Galego" } as Record<string, string>,

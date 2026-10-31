@@ -142,9 +142,13 @@ What the build adds compared with `device:ios`:
 
 - Distribution entitlements from the profile (`get-task-allow` false,
   `beta-reports-active` for TestFlight) via `scripts/ios_signing.py`.
+- A new version per build: the patch number is bumped by default
+  (`BUMP=minor|major|none`, or `APP_VERSION=X.Y.Z`). `scripts/version.py`
+  keeps `build/config.yml`, both iOS plists, Android's `versionName` (and
+  `versionCode`, +1), `appVersion` in `main.go` and `APP_VERSION` in
+  `frontend/src/main.ts` in sync; commit the change after the build.
 - A fresh `CFBundleVersion` per build (`YYMMDD.HHMM`, override with
-  `BUILD_NUMBER=`); the marketing version is `CFBundleShortVersionString` in
-  `build/ios/Info.plist` (override with `APP_VERSION=`).
+  `BUILD_NUMBER=`).
 - The `DT*` keys Xcode normally writes (SDK, platform and Xcode versions),
   which App Store Connect validates; `ios:package` adds them to device builds.
 - `build/ios/PrivacyInfo.xcprivacy`: no tracking, no collected data, and the
@@ -257,8 +261,9 @@ uses — `https://servizos.meteogalicia.gal/mgrss/predicion/jsonPredConcellos.ac
 
 ## Settings and languages
 
-`#/ajustes` (from "Más") holds the account placeholder — profile management
-will live here once accounts exist — and display preferences:
+`#/ajustes` (from "Más") holds the display preferences (an account block
+will go first once accounts exist; no placeholder before, App Review rejects
+"coming soon" features):
 
 | Setting | Values | Effect |
 | --- | --- | --- |

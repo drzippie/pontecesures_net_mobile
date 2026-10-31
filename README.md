@@ -29,7 +29,7 @@ light theme, Spanish UI. The app also runs on a physical iPhone with iOS 27.</su
 - Weather for Pontecesures from MeteoGalicia: a discreet line on the front
   page and a forecast view (today by time slot, next days, warnings)
 - Settings: language (Spanish/Galician), light/dark/automatic theme and text
-  size; the account block will host the profile once accounts exist
+  size; an account block will be added once accounts exist
 - Full-screen image viewer with pinch and double-tap zoom (posters and
   obituaries are images with text)
 - Save articles to read later, also offline

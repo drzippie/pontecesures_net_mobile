@@ -276,19 +276,8 @@
     <section x-show="base.name === 'settings'" class="px-4 pt-4 space-y-6">
       <h1 class="font-display text-2xl font-bold" x-text="t.settings.title"></h1>
 
-      <!-- Account (profile management will live here once accounts exist) -->
-      <div>
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted mb-2" x-text="t.settings.account"></h2>
-        <div class="flex items-center gap-3 rounded-xl bg-surface border border-line-soft p-4">
-          <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-line-soft text-muted">
-            <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </span>
-          <div class="min-w-0">
-            <p class="font-semibold" x-text="t.settings.guest"></p>
-            <p class="text-sm text-muted" x-text="t.settings.accountSoon"></p>
-          </div>
-        </div>
-      </div>
+      <!-- The account block (login, profile) goes here, first, once accounts
+           exist. Not shown before: App Review rejects "coming soon" features. -->
 
       <!-- Language -->
       <div>

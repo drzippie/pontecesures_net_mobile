@@ -116,14 +116,20 @@ tasks:
   store:ios:
     summary: Builds the App Store / TestFlight .ipa (distribution signing)
     desc: |
-      Usage: wails3 task store:ios [IOS_STORE_PROFILE=path.mobileprovision]
-             [BUILD_NUMBER=...] [APP_VERSION=1.0.0]
+      Usage: wails3 task store:ios [BUMP=patch|minor|major|none]
+             [APP_VERSION=X.Y.Z] [BUILD_NUMBER=...]
+             [IOS_STORE_PROFILE=path.mobileprovision]
 
       Same build as device:ios, signed with the "Apple Distribution"
       certificate and an App Store Connect provisioning profile (default
-      bin/store.mobileprovision). Each upload needs a new build number; the
-      default is the build time (YYMMDD.HHMM). The marketing version comes
-      from build/ios/Info.plist unless APP_VERSION is set.
+      bin/store.mobileprovision).
+
+      Every store build gets a new version: the patch number is bumped by
+      default (scripts/version.py updates config, iOS, Android, Go and the
+      frontend); BUMP=minor/major, APP_VERSION=X.Y.Z to set it, BUMP=none to
+      keep it. Commit the version change afterwards. The build number
+      (CFBundleVersion) is the build time (YYMMDD.HHMM) unless BUILD_NUMBER
+      is set.
 
       Upload the result with `wails3 task store:ios:upload` or the
       Transporter app. See docs/DEVELOPMENT.md (App Store section).
@@ -131,6 +137,8 @@ tasks:
       IOS_STORE_PROFILE: '{{.IOS_STORE_PROFILE | default "bin/store.mobileprovision"}}'
       BUNDLE_ID: net.pontecesures.app
       ENTITLEMENTS: bin/store.entitlements
+      BUMP: '{{.BUMP | default "patch"}}'
+      APP_VERSION: '{{.APP_VERSION | default ""}}'
       BUILD_NUMBER:
         sh: echo "${BUILD_NUMBER:-$(date +%y%m%d.%H%M)}"
       IDENTITY:
@@ -141,10 +149,12 @@ tasks:
       - sh: test -n "{{.IDENTITY}}"
         msg: "No keychain identity matches the Apple Distribution certificate in {{.IOS_STORE_PROFILE}}."
     cmds:
+      - |
+        {{if .APP_VERSION}}python3 scripts/version.py set {{.APP_VERSION}}{{else if ne .BUMP "none"}}python3 scripts/version.py bump {{.BUMP}}{{else}}python3 scripts/version.py get{{end}}
       - python3 scripts/ios_signing.py entitlements "{{.IOS_STORE_PROFILE}}" {{.BUNDLE_ID}} {{.ENTITLEMENTS}}
-      - wails3 task ios:package:ipa IOS_PLATFORM=device CODESIGN_IDENTITY={{.IDENTITY}} PROVISIONING_PROFILE="{{.IOS_STORE_PROFILE}}" ENTITLEMENTS_FILE={{.ENTITLEMENTS}} BUILD_NUMBER={{.BUILD_NUMBER}} APP_VERSION={{.APP_VERSION}}
+      - wails3 task ios:package:ipa IOS_PLATFORM=device CODESIGN_IDENTITY={{.IDENTITY}} PROVISIONING_PROFILE="{{.IOS_STORE_PROFILE}}" ENTITLEMENTS_FILE={{.ENTITLEMENTS}} BUILD_NUMBER={{.BUILD_NUMBER}}
       - codesign --verify --deep --strict "{{.BIN_DIR}}/{{.APP_NAME}}.app"
-      - echo "Build {{.BUILD_NUMBER}} ready at {{.BIN_DIR}}/{{.APP_NAME}}.ipa"
+      - echo "Version $(python3 scripts/version.py get) ({{.BUILD_NUMBER}}) ready at {{.BIN_DIR}}/{{.APP_NAME}}.ipa"
 
   store:ios:upload:
     summary: Validates and uploads bin/<app>.ipa to App Store Connect (TestFlight)
