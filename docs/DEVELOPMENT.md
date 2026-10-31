@@ -82,6 +82,43 @@ icon is the municipal coat of arms and is intentionally not used:
 pontecesures.net is not the Concello, and stores reject apps that look
 official.
 
+## Running on an iPhone
+
+```bash
+wails3 task device:ios            # build, sign, install and launch (USB or same Wi-Fi)
+```
+
+Requirements: Xcode with the Apple Developer account added, Developer Mode on
+the iPhone, a development provisioning profile at `bin/dev.mobileprovision`
+(gitignored; Xcode's "iOS Team Provisioning Profile" or one downloaded from
+developer.apple.com) and the matching "Apple Development" identity in the
+keychain. `scripts/ios_signing.py` picks the identity the profile allows and
+derives the entitlements (the account's App ID prefix, `3W5LP84889`, differs
+from the team id `MA8KEHHSX2`).
+
+Lessons learned (Wails v3.0.0, Xcode 27, iOS 27):
+
+- **iOS 27 requires the UIScene lifecycle** for apps linked against the
+  iOS 27 SDK; Wails still uses the legacy app-delegate window, so the app
+  quits immediately (exit code 0, no logs). `build/ios/Taskfile.yml` links
+  with `-platform_version ios <min> 26.0` (`IOS_LINKED_SDK`) as a
+  workaround. Upstream: wailsapp/wails#6377, #6194. Remove the workaround once
+  Wails adopts UIScene, and before Apple requires the iOS 27 SDK for uploads.
+- **Do not use the generated Xcode project** (`wails3 task ios:xcode`) for
+  device builds: it disables signing, names the executable `wailsapp` while
+  `PRODUCT_NAME` is the display name, does not force-load `WailsAppDelegate`
+  and its Go build phase needs `go` in Xcode's PATH. `device:ios` uses
+  `ios:package IOS_PLATFORM=device` instead, which also compiles the icons
+  and (added here) the launch storyboard.
+- **Signing.** Xcode looped on "Revoke certificate" because the Apple WWDR G3
+  intermediate certificate was missing from the keychain, so no development
+  certificate could be valid. Installing `AppleWWDRCAG3.cer` from
+  apple.com/certificateauthority fixes it. A certificate downloaded from the
+  developer portal never contains the private key.
+- **Logs.** Release builds print nothing; `log collect --device-udid` needs
+  root *and* a USB connection. Install, launch and `devicectl device copy
+  from --domain-type appDataContainer` all work over Wi-Fi.
+
 ## Debugging
 
 - iOS: Safari → Develop → Simulator → the app. Logs: `wails3 task ios:logs:dev`.

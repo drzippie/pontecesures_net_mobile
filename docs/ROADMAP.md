@@ -20,7 +20,9 @@
 - [x] Search by relevance and within a section
 - [x] Accessibility pass (contrast, screen readers, touch targets, reduced motion)
 - [x] Android release shrinking with R8 (8.8 MB APK)
+- [x] Run on a physical iPhone (iOS 27) with development signing
 - [ ] Verify the iOS edge-swipe back gesture on a device
+- [ ] Drop the iOS SDK 26 link workaround once Wails supports UIScene (wailsapp/wails#6377)
 - [ ] Fetch the illustration mapping from `pcn/v1/illustrations` once deployed
 - [ ] Deploy `pcn-mobile` so related posts match the website exactly
 

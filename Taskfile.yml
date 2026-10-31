@@ -68,3 +68,47 @@ tasks:
     summary: Builds and runs the Docker image
     cmds:
       - task: common:run:docker
+
+  device:ios:
+    summary: Builds, signs and installs the app on an iPhone (development signing)
+    desc: |
+      Usage: wails3 task device:ios [IOS_PROFILE=path.mobileprovision] [DEVICE_ID=<udid>]
+
+      Uses the Wails device packaging (ios:package IOS_PLATFORM=device), which
+      links the Go archive with -force_load and embeds icons and the launch
+      screen. The generated Xcode project is not used: in Wails v3.0.0 it
+      disables signing, names the executable "wailsapp" while PRODUCT_NAME
+      differs, does not force-load WailsAppDelegate and needs `go` in Xcode's
+      PATH.
+
+      Needs a development provisioning profile for the team (default
+      bin/dev.mobileprovision; Xcode's "iOS Team Provisioning Profile" or one
+      downloaded from developer.apple.com) and its certificate's identity in
+      the keychain. The iPhone can be on the same Wi-Fi network; Developer
+      Mode must be on. See docs/DEVELOPMENT.md.
+    vars:
+      IOS_PROFILE: '{{.IOS_PROFILE | default "bin/dev.mobileprovision"}}'
+      BUNDLE_ID: net.pontecesures.app
+      ENTITLEMENTS: bin/dev.entitlements
+      IDENTITY:
+        sh: python3 scripts/ios_signing.py identity "{{.IOS_PROFILE}}" 2>/dev/null || true
+    preconditions:
+      - sh: test -f "{{.IOS_PROFILE}}"
+        msg: "Provisioning profile not found at {{.IOS_PROFILE}}. See docs/DEVELOPMENT.md (iPhone section)."
+      - sh: test -n "{{.IDENTITY}}"
+        msg: "No keychain identity matches a certificate in {{.IOS_PROFILE}}. Check Xcode > Settings > Accounts > Manage Certificates."
+    cmds:
+      - python3 scripts/ios_signing.py entitlements "{{.IOS_PROFILE}}" {{.BUNDLE_ID}} {{.ENTITLEMENTS}}
+      - wails3 task ios:package IOS_PLATFORM=device CODESIGN_IDENTITY={{.IDENTITY}} PROVISIONING_PROFILE="{{.IOS_PROFILE}}" ENTITLEMENTS_FILE={{.ENTITLEMENTS}}
+      - |
+        DEVICE="{{.DEVICE_ID}}"
+        if [ -z "$DEVICE" ]; then
+          TMP=$(mktemp)
+          xcrun devicectl list devices --json-output "$TMP" >/dev/null 2>&1
+          DEVICE=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(next((x['hardwareProperties']['udid'] for x in d['result']['devices'] if x.get('hardwareProperties',{}).get('reality')=='physical' and x['hardwareProperties'].get('deviceType')=='iPhone'), ''))" "$TMP")
+          rm -f "$TMP"
+        fi
+        if [ -z "$DEVICE" ]; then echo "No iPhone found. Connect it (cable or same Wi-Fi) and unlock it."; exit 1; fi
+        echo "Installing on $DEVICE..."
+        xcrun devicectl device install app --device "$DEVICE" "{{.BIN_DIR}}/{{.APP_NAME}}.app" >/dev/null
+        xcrun devicectl device process launch --terminate-existing --device "$DEVICE" {{.BUNDLE_ID}}

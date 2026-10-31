@@ -17,6 +17,13 @@ vars:
   MIN_IOS_VERSION: '{{.MIN_IOS_VERSION | default "15.0"}}'
   IOS_SDK: '{{if eq .IOS_PLATFORM "device"}}iphoneos{{else}}iphonesimulator{{end}}'
   IOS_TARGET: 'arm64-apple-ios{{.MIN_IOS_VERSION}}{{if ne .IOS_PLATFORM "device"}}-simulator{{end}}'
+  # SDK version recorded in the linked executable (LC_BUILD_VERSION).
+  # iOS 27 refuses to launch apps linked against the iOS 27 SDK that do not
+  # use the UIScene lifecycle, and Wails v3.0.0 still uses the legacy
+  # UIApplicationDelegate window. Declaring SDK 26 keeps the legacy lifecycle
+  # working. Remove once Wails adopts UIScene (and before Apple requires the
+  # iOS 27 SDK for App Store uploads).
+  IOS_LINKED_SDK: '{{.IOS_LINKED_SDK | default "26.0"}}'
   IOS_VERSION_MIN_FLAG: '{{if eq .IOS_PLATFORM "device"}}-miphoneos-version-min={{.MIN_IOS_VERSION}}{{else}}-mios-simulator-version-min={{.MIN_IOS_VERSION}}{{end}}'
   # "-" is ad-hoc signing: fine for the simulator, rejected by real devices.
   CODESIGN_IDENTITY: '{{.CODESIGN_IDENTITY | default "-"}}'
@@ -113,6 +120,7 @@ tasks:
           -framework AVFoundation \
           -framework CoreLocation -framework CoreMotion -framework SystemConfiguration \
           -lresolv \
+          -Wl,-platform_version,{{if eq .IOS_PLATFORM "device"}}ios{{else}}ios-simulator{{end}},{{.MIN_IOS_VERSION}},{{.IOS_LINKED_SDK}} \
           -o "{{.BIN_DIR}}/{{.APP_NAME | lower}}" \
           "$MAIN_M" -Wl,-force_load,"{{.BIN_DIR}}/{{.APP_NAME}}.a"
 
@@ -127,6 +135,13 @@ tasks:
         # Embed the provisioning profile for device builds when provided
         if [ "{{.IOS_PLATFORM}}" = "device" ] && [ -n "{{.PROVISIONING_PROFILE}}" ]; then
           cp "{{.PROVISIONING_PROFILE}}" "{{.BIN_DIR}}/{{.APP_NAME}}.app/embedded.mobileprovision"
+        fi
+      - |
+        # Compile the launch screen referenced by UILaunchStoryboardName.
+        if [ -f build/ios/LaunchScreen.storyboard ]; then
+          xcrun ibtool --compile "{{.BIN_DIR}}/{{.APP_NAME}}.app/LaunchScreen.storyboardc" \
+            build/ios/LaunchScreen.storyboard --target-device iphone --target-device ipad \
+            --minimum-deployment-target {{.MIN_IOS_VERSION}}
         fi
       - |
         # Compile asset catalog and embed icons in the app bundle
