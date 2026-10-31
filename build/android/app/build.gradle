@@ -42,7 +42,10 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            // R8 code shrinking + resource shrinking (~half the APK size).
+            // Keep rules for the Go/JS bridges live in proguard-rules.pro.
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig hasKeystore ? signingConfigs.release : signingConfigs.debug
         }
