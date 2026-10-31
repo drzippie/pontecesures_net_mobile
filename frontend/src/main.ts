@@ -22,7 +22,7 @@ const RESUME_REFRESH_MS = 15 * 60 * 1000;
 /** Re-fetch the forecast when the copy shown is older than this. */
 const WEATHER_TTL_MS = 30 * 60 * 1000;
 
-const APP_VERSION = "0.1.2";
+const APP_VERSION = "1.0.0";
 const SITE = "https://pontecesures.net";
 
 /** State of one paginated list (a section feed or the search results). */
