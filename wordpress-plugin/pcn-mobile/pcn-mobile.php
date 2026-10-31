@@ -5,7 +5,7 @@
  * Version:           0.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
- * Author:            Pontecesures.net
+ * Author:            Antonio Cortés (DrZippie)
  * License:           MIT
  * License URI:       https://opensource.org/licenses/MIT
  * Text Domain:       pcn-mobile

@@ -68,6 +68,6 @@ docs/                 Roadmap and development notes
 
 ## License
 
-Code released under the [MIT License](LICENSE). News content and images shown
+Code © Antonio Cortés (DrZippie), released under the [MIT License](LICENSE). News content and images shown
 in the app belong to pontecesures.net and their authors and are not covered by
 this license.
