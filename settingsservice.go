@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
@@ -23,16 +21,10 @@ func (s *SettingsService) ServiceStartup(ctx context.Context, _ application.Serv
 	return nil
 }
 
-// settingsPath: app private storage on mobile, user config dir on desktop.
-// Not a cache directory: preferences must survive cache clean-ups.
+// settingsPath: persistent data, not a cache (preferences must survive
+// cache clean-ups).
 func settingsPath() string {
-	if dir := application.Mobile.StoragePath(); dir != "" {
-		return filepath.Join(dir, "settings.json")
-	}
-	if dir, err := os.UserConfigDir(); err == nil {
-		return filepath.Join(dir, "pontecesures_net_mobile", "settings.json")
-	}
-	return ""
+	return dataPath("settings.json")
 }
 
 // Get returns the saved settings (empty fields mean "default").

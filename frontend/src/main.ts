@@ -97,6 +97,9 @@ Alpine.data("app", () => ({
 
   categories: [] as Category[],
   feeds: {} as Record<number, ListState>,
+  /** Saved articles (offline reading). */
+  savedList: emptyList(),
+  savedIds: [] as number[],
   search: { ...emptyList(), q: "", ran: "" },
   searchTimer: undefined as number | undefined,
 
@@ -142,6 +145,7 @@ Alpine.data("app", () => ({
     this.loadCategories();
     this.loadWeather();
     this.syncSettings();
+    this.loadSavedIds();
   },
 
   /**
@@ -242,6 +246,8 @@ Alpine.data("app", () => ({
     this.article.id = 0;
 
     const list = this.listFor(r);
+    // The saved list can change from any article: reload it on every visit.
+    if (r.name === "saved") Object.assign(this.savedList, emptyList());
     if (list && list.page === 0 && r.name !== "search") this.loadMore();
     // Coming back from an article the list never moved (the article is an
     // overlay), so only restore the position when switching between lists.
@@ -255,7 +261,7 @@ Alpine.data("app", () => ({
   },
 
   get isListView(): boolean {
-    return ["home", "section", "search"].includes(this.base.name);
+    return ["home", "section", "search", "saved"].includes(this.base.name);
   },
 
   get sectionName(): string {
@@ -264,6 +270,7 @@ Alpine.data("app", () => ({
 
   listFor(r: Route): (ListState & { q?: string }) | null {
     if (r.name === "search") return this.search;
+    if (r.name === "saved") return this.savedList;
     if (r.name !== "home" && r.name !== "section") return null;
     const id = r.name === "section" ? r.id : 0;
     if (!this.feeds[id]) this.feeds[id] = emptyList();
@@ -287,6 +294,12 @@ Alpine.data("app", () => ({
   async loadMore() {
     const list = this.list;
     if (list.loading || list.page >= list.totalPages) return;
+    if (this.base.name === "saved") {
+      list.items = (await ContentService.Saved()) ?? [];
+      list.page = list.totalPages = 1;
+      list.total = list.items.length;
+      return;
+    }
     const isSearch = this.base.name === "search";
     const q = isSearch ? this.search.q.trim() : "";
     if (isSearch && q.length < 3) return;
@@ -436,6 +449,38 @@ Alpine.data("app", () => ({
     this.lightbox = { open: false, src: "", alt: "", hint: false };
   },
 
+  // ---------- saved articles ----------
+
+  async loadSavedIds() {
+    try {
+      this.savedIds = (await ContentService.SavedIDs()) ?? [];
+    } catch {
+      /* none */
+    }
+  },
+
+  isSaved(id: number): boolean {
+    return this.savedIds.includes(id);
+  },
+
+  async toggleSaved() {
+    const id = this.article.data?.id;
+    if (!id) return;
+    try {
+      if (this.isSaved(id)) {
+        await ContentService.RemoveSaved(id);
+        this.savedIds = this.savedIds.filter((x) => x !== id);
+        this.showToast(this.t.article.removedToast);
+      } else {
+        await ContentService.SaveArticle(id);
+        this.savedIds = [...this.savedIds, id];
+        this.showToast(this.t.article.savedToast);
+      }
+    } catch {
+      this.showToast(this.t.error.generic);
+    }
+  },
+
   /** Intercepts taps inside an article body: images open the viewer, links navigate. */
   async onContentClick(ev: MouseEvent) {
     const target = ev.target as HTMLElement;
@@ -517,7 +562,7 @@ Alpine.data("app", () => ({
     // Sections and the weather view are reached from the front page; the
     // settings from "More".
     const b = this.base.name;
-    const n = b === "section" || b === "weather" ? "home" : b === "settings" ? "more" : b;
+    const n = b === "section" || b === "weather" ? "home" : b === "settings" || b === "saved" ? "more" : b;
     return n === name;
   },
 }));

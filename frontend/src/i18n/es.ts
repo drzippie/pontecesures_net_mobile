@@ -45,6 +45,10 @@ export const es = {
     by: "Por {author}",
     loading: "Cargando noticia…",
     related: "Más sobre esto",
+    save: "Guardar para leer luego",
+    unsave: "Quitar de guardadas",
+    savedToast: "Guardada: podrás leerla sin conexión",
+    removedToast: "Quitada de guardadas",
     closeImage: "Cerrar imagen",
     imageHint: "Pellizca o toca dos veces para ampliar",
   },
@@ -54,6 +58,7 @@ export const es = {
     about:
       "Pontecesures.net es el diario digital de Pontecesures desde 2005. Esta aplicación muestra sus noticias; el contenido se publica en gallego.",
     settings: "Ajustes",
+    saved: "Noticias guardadas",
     links: "Enlaces",
     website: "Abrir pontecesures.net",
     collaborate: "Colaborar",
@@ -78,6 +83,11 @@ export const es = {
     textSizes: { normal: "Normal", large: "Grande", xlarge: "Muy grande" } as Record<string, string>,
     textPreview: "Así se verán las noticias.",
     saveError: "No se han podido guardar los ajustes.",
+  },
+
+  saved: {
+    title: "Noticias guardadas",
+    empty: "Aún no has guardado ninguna noticia. Toca el marcador de una noticia para leerla luego, también sin conexión.",
   },
 
   weather: {

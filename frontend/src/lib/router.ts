@@ -6,6 +6,7 @@
 //   #/mas               about / links
 //   #/tiempo            weather forecast
 //   #/ajustes           settings
+//   #/guardadas         saved articles
 //   #/noticia/:id       article (rendered as an overlay over the last list)
 
 export type Route =
@@ -16,6 +17,7 @@ export type Route =
   | { name: "more" }
   | { name: "weather" }
   | { name: "settings" }
+  | { name: "saved" }
   | { name: "article"; id: number };
 
 export function parseHash(hash: string): Route {
@@ -34,6 +36,8 @@ export function parseHash(hash: string): Route {
       return { name: "weather" };
     case "ajustes":
       return { name: "settings" };
+    case "guardadas":
+      return { name: "saved" };
     case "noticia":
       return id > 0 ? { name: "article", id } : { name: "home" };
     default:
@@ -55,6 +59,8 @@ export function href(r: Route): string {
       return "#/tiempo";
     case "settings":
       return "#/ajustes";
+    case "saved":
+      return "#/guardadas";
     case "article":
       return `#/noticia/${r.id}`;
     default:

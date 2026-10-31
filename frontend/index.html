@@ -68,6 +68,8 @@
     <!-- ===== Post list (portada, sección, búsqueda) ===== -->
     <section x-show="isListView" class="px-4 pt-4 space-y-4">
       <h1 x-show="base.name === 'section' && sectionName" class="font-display text-2xl font-bold" x-text="sectionName"></h1>
+      <h1 x-show="base.name === 'saved'" class="font-display text-2xl font-bold" x-text="t.saved.title"></h1>
+      <p x-show="base.name === 'saved' && list.page > 0 && !list.items.length" class="py-6 text-center text-muted leading-relaxed" x-text="t.saved.empty"></p>
 
       <!-- Weather: one discreet line on the front page; tap for the full forecast. -->
       <template x-if="base.name === 'home' && today">
@@ -129,10 +131,10 @@
             <button type="button" class="rounded-full bg-estuario text-white px-4 py-2 font-semibold" @click="loadMore()" x-text="t.error.retry"></button>
           </div>
         </template>
-        <template x-if="!list.loading && !list.error && list.page > 0 && list.page >= list.totalPages && list.items.length">
+        <template x-if="!list.loading && !list.error && list.page > 0 && list.page >= list.totalPages && list.items.length && base.name !== 'saved'">
           <p x-text="t.feed.end"></p>
         </template>
-        <template x-if="!list.loading && !list.error && list.page > 0 && !list.items.length && base.name !== 'search'">
+        <template x-if="!list.loading && !list.error && list.page > 0 && !list.items.length && base.name !== 'search' && base.name !== 'saved'">
           <p x-text="t.feed.empty"></p>
         </template>
         <!-- Infinite scroll sentinel -->
@@ -314,6 +316,12 @@
         <span class="flex-1 font-semibold" x-text="t.more.settings"></span>
         <svg class="size-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
       </a>
+      <a href="#/guardadas" class="flex items-center gap-3 rounded-xl bg-surface border border-line-soft px-4 py-3.5 active:bg-line-soft">
+        <svg class="size-5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span class="flex-1 font-semibold" x-text="t.more.saved"></span>
+        <span class="text-sm text-muted tabular-nums" x-show="savedIds.length" x-text="savedIds.length"></span>
+        <svg class="size-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
       <div>
         <h2 class="text-xs font-semibold uppercase tracking-wider text-muted mb-2" x-text="t.more.links"></h2>
         <ul class="rounded-xl bg-surface border border-line-soft divide-y divide-line-soft overflow-hidden">
@@ -348,9 +356,16 @@
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
           <span class="font-semibold" x-text="t.article.back"></span>
         </button>
+        <div class="flex items-center">
+        <button type="button" class="p-2 rounded-full active:bg-white/10" x-show="article.data"
+                :aria-label="article.data && isSaved(article.data.id) ? t.article.unsave : t.article.save"
+                :aria-pressed="article.data && isSaved(article.data.id)" @click="toggleSaved()">
+          <svg class="size-5" viewBox="0 0 24 24" :fill="article.data && isSaved(article.data.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
         <button type="button" class="p-2 rounded-full active:bg-white/10" :aria-label="t.article.share" @click="share()" x-show="article.data">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
         </button>
+        </div>
       </div>
     </div>
 

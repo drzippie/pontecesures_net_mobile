@@ -46,6 +46,10 @@ export const gl: Strings = {
     by: "Por {author}",
     loading: "Cargando a nova…",
     related: "Máis sobre isto",
+    save: "Gardar para ler despois",
+    unsave: "Quitar das gardadas",
+    savedToast: "Gardada: poderás lela sen conexión",
+    removedToast: "Quitada das gardadas",
     closeImage: "Pechar a imaxe",
     imageHint: "Belisca ou toca dúas veces para ampliar",
   },
@@ -54,6 +58,7 @@ export const gl: Strings = {
     title: "Máis",
     about: "Pontecesures.net é o xornal dixital de Pontecesures dende 2005. Esta aplicación amosa as súas novas.",
     settings: "Axustes",
+    saved: "Novas gardadas",
     links: "Ligazóns",
     website: "Abrir pontecesures.net",
     collaborate: "Colaborar",
@@ -78,6 +83,11 @@ export const gl: Strings = {
     textSizes: { normal: "Normal", large: "Grande", xlarge: "Moi grande" },
     textPreview: "Así se verán as novas.",
     saveError: "Non se puideron gardar os axustes.",
+  },
+
+  saved: {
+    title: "Novas gardadas",
+    empty: "Aínda non gardaches ningunha nova. Toca o marcador dunha nova para lela despois, tamén sen conexión.",
   },
 
   weather: {

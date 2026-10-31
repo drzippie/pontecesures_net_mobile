@@ -35,7 +35,8 @@ export function OpenURL(link: string): $CancellablePromise<void> {
 }
 
 /**
- * Post returns a full article.
+ * Post returns a full article. Saved articles are always readable offline,
+ * and their stored copy is refreshed whenever the network copy loads.
  */
 export function Post(id: number): $CancellablePromise<wp$0.Post> {
     return $Call.ByID(1472315466, id);
@@ -65,6 +66,13 @@ export function Related(id: number): $CancellablePromise<wp$0.PostSummary[] | nu
 }
 
 /**
+ * RemoveSaved deletes a saved article.
+ */
+export function RemoveSaved(id: number): $CancellablePromise<void> {
+    return $Call.ByID(2248628531, id);
+}
+
+/**
  * SafeArea returns the raw system bar insets (physical pixels on Android,
  * points on iOS; zero on desktop). Android's WebView does not expose them
  * through CSS env(safe-area-inset-*) when drawing edge-to-edge, so the
@@ -72,6 +80,27 @@ export function Related(id: number): $CancellablePromise<wp$0.PostSummary[] | nu
  */
 export function SafeArea(): $CancellablePromise<$models.Insets> {
     return $Call.ByID(277054316);
+}
+
+/**
+ * SaveArticle stores an article on the device for offline reading.
+ */
+export function SaveArticle(id: number): $CancellablePromise<void> {
+    return $Call.ByID(2428203617, id);
+}
+
+/**
+ * Saved returns the saved articles, most recently saved first.
+ */
+export function Saved(): $CancellablePromise<wp$0.PostSummary[] | null> {
+    return $Call.ByID(2877821083);
+}
+
+/**
+ * SavedIDs returns the ids of the saved articles.
+ */
+export function SavedIDs(): $CancellablePromise<number[] | null> {
+    return $Call.ByID(2497769599);
 }
 
 /**

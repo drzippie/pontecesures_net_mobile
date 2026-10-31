@@ -14,6 +14,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
+	"github.com/drzippie/pontecesures_net_mobile/internal/saved"
 	"github.com/drzippie/pontecesures_net_mobile/internal/wp"
 )
 
@@ -25,6 +26,7 @@ const minCategoryPosts = 20
 // WordPress directly (no CORS issues, offline cache in one place).
 type ContentService struct {
 	client *wp.Client
+	saved  *saved.Store
 }
 
 // ServiceStartup initialises the WordPress client once the platform storage
@@ -34,6 +36,7 @@ func (s *ContentService) ServiceStartup(ctx context.Context, _ application.Servi
 		CacheDir:  cacheDir("wp-cache"),
 		UserAgent: "PontecesuresNetMobile/" + appVersion,
 	})
+	s.saved = saved.NewStore(dataPath("saved"))
 	// Light status bar icons over the dark app chrome (no-op on desktop).
 	application.Mobile.SetStatusBar(`{"style":"light"}`)
 	return nil
@@ -46,6 +49,18 @@ func cacheDir(name string) string {
 		return filepath.Join(dir, name)
 	}
 	if dir, err := os.UserCacheDir(); err == nil {
+		return filepath.Join(dir, "pontecesures_net_mobile", name)
+	}
+	return ""
+}
+
+// dataPath returns a path for persistent user data (not a cache): the app's
+// private storage on mobile, the user config dir on desktop.
+func dataPath(name string) string {
+	if dir := application.Mobile.StoragePath(); dir != "" {
+		return filepath.Join(dir, name)
+	}
+	if dir, err := os.UserConfigDir(); err == nil {
 		return filepath.Join(dir, "pontecesures_net_mobile", name)
 	}
 	return ""
@@ -70,11 +85,52 @@ func (s *ContentService) Posts(page int, categoryID int, search string) (wp.Post
 	return s.client.Posts(ctx, wp.ListQuery{Page: page, CategoryID: categoryID, Search: search})
 }
 
-// Post returns a full article.
+// Post returns a full article. Saved articles are always readable offline,
+// and their stored copy is refreshed whenever the network copy loads.
 func (s *ContentService) Post(id int) (wp.Post, error) {
 	ctx, cancel := reqCtx()
 	defer cancel()
-	return s.client.Post(ctx, id)
+	p, err := s.client.Post(ctx, id)
+	if err != nil {
+		if sp, ok := s.saved.Get(id); ok {
+			return sp, nil
+		}
+		return p, err
+	}
+	if _, ok := s.saved.Get(id); ok {
+		_ = s.saved.Put(p)
+	}
+	return p, nil
+}
+
+// SaveArticle stores an article on the device for offline reading.
+func (s *ContentService) SaveArticle(id int) error {
+	ctx, cancel := reqCtx()
+	defer cancel()
+	p, err := s.client.Post(ctx, id)
+	if err != nil {
+		return err
+	}
+	return s.saved.Put(p)
+}
+
+// RemoveSaved deletes a saved article.
+func (s *ContentService) RemoveSaved(id int) error {
+	return s.saved.Remove(id)
+}
+
+// SavedIDs returns the ids of the saved articles.
+func (s *ContentService) SavedIDs() []int {
+	ids := s.saved.IDs()
+	if ids == nil {
+		ids = []int{}
+	}
+	return ids
+}
+
+// Saved returns the saved articles, most recently saved first.
+func (s *ContentService) Saved() []wp.PostSummary {
+	return s.saved.List()
 }
 
 // permalinkRe matches pontecesures.net post permalinks: /YYYY/MM/DD/slug/
