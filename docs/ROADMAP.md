@@ -30,7 +30,8 @@
 - [x] iOS distribution signing and App Store build (`wails3 task store:ios`)
 - [ ] Android upload keystore
 - [ ] TestFlight and Google Play internal testing
-- [ ] Privacy policy and store listings (Spanish)
+- [x] App Store listing draft and screenshots (`docs/store/APP_STORE.md`)
+- [ ] Publish the app privacy policy on pontecesures.net
 - [ ] CI builds (GitHub Actions)
 
 ## Phase 3 — Optional user accounts (last)
