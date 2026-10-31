@@ -174,7 +174,7 @@
     </div>
 
     <template x-if="article.data">
-      <article class="pb-[calc(2rem+var(--sa-bottom))]">
+      <article class="pb-[calc(6rem+var(--sa-bottom))]">
         <!-- Photos already appear in the body; only the section illustration is used as a header. -->
         <template x-if="article.data.image && (article.data.image.fallback || !article.full)">
           <div class="bg-line-soft" :class="article.data.image.landscape ? 'aspect-[16/9]' : 'flex justify-center'">
@@ -222,7 +222,8 @@
   </div>
 
   <!-- ===== Bottom tab bar ===== -->
-  <nav class="fixed inset-x-0 bottom-0 z-30 bg-chrome pb-safe">
+  <!-- Above the article overlay (z-40) so it is always reachable. -->
+  <nav class="fixed inset-x-0 bottom-0 z-50 bg-chrome pb-safe">
     <div class="grid grid-cols-4">
       <template x-for="tab in [
           { name: 'home', hash: '#/', label: t.tabs.home, icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
@@ -242,7 +243,7 @@
 
   <!-- ===== Toast ===== -->
   <div x-show="toast" x-transition.opacity role="status" aria-live="polite"
-       class="fixed inset-x-0 bottom-[calc(5rem+var(--sa-bottom))] z-50 flex justify-center pointer-events-none">
+       class="fixed inset-x-0 bottom-[calc(5rem+var(--sa-bottom))] z-[60] flex justify-center pointer-events-none">
     <span class="rounded-full bg-ink text-ground px-4 py-2 text-sm shadow-lg" x-text="toast"></span>
   </div>
 </body>
