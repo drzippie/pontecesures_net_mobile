@@ -20,6 +20,12 @@ defaulting to the device language); news content comes from the site as-is.
   page and a forecast view (today by time slot, next days, warnings)
 - Settings: language (Spanish/Galician), light/dark/automatic theme and text
   size; the account block will host the profile once accounts exist
+- Full-screen image viewer with pinch and double-tap zoom (posters and
+  obituaries are images with text)
+- Save articles to read later, also offline
+- Search by relevance or date, optionally within a section
+- Pull to refresh; content refreshes itself after 15+ minutes away
+- Android back button and iOS edge swipe navigate inside the app
 - Native share sheet on mobile (copies the link on desktop)
 - Offline reading of anything already loaded (file cache)
 - Light & dark themes using the website's design tokens

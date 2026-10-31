@@ -53,6 +53,35 @@ avdmanager create avd --name wails --package "system-images;android-35;google_ap
   with `device offline`. Start the emulator yourself on a free port
   (`emulator -avd wails -port 5580`) and export `ANDROID_SERIAL=emulator-5580`.
 
+- **Android back button.** `WebView.canGoBack()` ignores the fragment
+  navigations the app uses (`#/noticia/123`), so back used to close the app.
+  `MainActivity.onBackPressed` asks the page first via
+  `window.pcnHandleBack()` (closes the image viewer, then the article, then
+  walks back through views) and only leaves the app from the front page.
+  The frontend keeps its own stack of visited hashes (`navStack`).
+- **Lifecycle.** The Android WebView neither fires `visibilitychange` nor
+  receives events while paused. `lifecycle.go` listens to the native
+  `ActivityStopped/Resumed` (iOS `DidEnterBackground/DidBecomeActive`) events
+  and emits `app:foreground` with the milliseconds spent away, measured in Go.
+- **R8.** Release builds use `minifyEnabled` + `shrinkResources`. Go resolves
+  `WailsBridge` methods by name through JNI and the page calls
+  `@JavascriptInterface` methods, so `proguard-rules.pro` keeps those; always
+  smoke-test a release APK (`wails3 task android:package`) after touching the
+  Java side or the rules.
+- **Emulator debuggability.** The Google APIs emulator image is `userdebug`,
+  so every WebView (also release builds) is inspectable there; on real
+  devices release builds are not.
+
+## App icon
+
+`build/appicon.png` (1024², source of the generated iOS AppIcon set) is a
+white Fraunces "P" with the tella dot on the brand blue, rendered from the
+app's own font. Android has legacy/round mipmaps plus an adaptive icon
+(`mipmap-anydpi-v26`, monochrome layer for themed icons). The website's site
+icon is the municipal coat of arms and is intentionally not used:
+pontecesures.net is not the Concello, and stores reject apps that look
+official.
+
 ## Debugging
 
 - iOS: Safari → Develop → Simulator → the app. Logs: `wails3 task ios:logs:dev`.
@@ -162,6 +191,21 @@ will live here once accounts exist — and display preferences:
   official MeteoGalicia terms.
 - `wails3 task android:run` uninstalls the app first, so saved settings are
   reset on every dev deploy.
+
+## Reading features
+
+- **Image viewer** (`src/lib/zoom.ts`): article images open full screen at
+  their largest `srcset` size; pinch, double tap and pan with pointer events
+  (`touch-action: none` on the viewer, the page itself never zooms).
+- **Saved articles** (`internal/saved`): full posts stored as JSON in
+  persistent storage (`dataPath("saved")`); `Post()` falls back to them when
+  offline and refreshes them when the network copy loads. Remote images in
+  saved posts depend on the WebView cache.
+- **Search**: `orderby=relevance` (only with a search term) or date, plus a
+  section filter.
+- **Refresh**: pull to refresh on lists (`src/lib/pull.ts`); after 15+ minutes
+  in the background the forecast reloads, and the list too if the reader is
+  near the top.
 
 ## Frontend
 

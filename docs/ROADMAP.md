@@ -12,8 +12,15 @@
 - [x] Weather for Pontecesures (MeteoGalicia): front-page line + forecast view
 - [x] Settings: language (Spanish/Galician), appearance, text size
 - [x] Verify on iOS Simulator (iOS 18.3) and Android Emulator (API 35)
-- [ ] App icon and launch screen
-- [ ] Pull-to-refresh gesture
+- [x] App icon and launch screen
+- [x] Pull-to-refresh gesture and refresh on return to the app
+- [x] Android back button / iOS swipe back navigate inside the app
+- [x] Image viewer with zoom
+- [x] Saved articles (offline)
+- [x] Search by relevance and within a section
+- [x] Accessibility pass (contrast, screen readers, touch targets, reduced motion)
+- [x] Android release shrinking with R8 (8.8 MB APK)
+- [ ] Verify the iOS edge-swipe back gesture on a device
 - [ ] Fetch the illustration mapping from `pcn/v1/illustrations` once deployed
 - [ ] Deploy `pcn-mobile` so related posts match the website exactly
 
