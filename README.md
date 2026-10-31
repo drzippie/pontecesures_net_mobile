@@ -8,6 +8,16 @@ native WebView — so the same codebase also runs on desktop.
 The app UI is available in **Spanish and Galician** (chosen in Settings,
 defaulting to the device language); news content comes from the site as-is.
 
+## Screenshots
+
+|         | Front page | Article | Weather |
+| ------- | :--------: | :-----: | :-----: |
+| **iOS** | <img src="docs/screenshots/ios-front-page.jpg" width="240" alt="Front page on iOS"> | <img src="docs/screenshots/ios-article.jpg" width="240" alt="Article on iOS"> | <img src="docs/screenshots/ios-weather.jpg" width="240" alt="Weather forecast on iOS"> |
+| **Android** | <img src="docs/screenshots/android-front-page.jpg" width="240" alt="Front page on Android"> | <img src="docs/screenshots/android-article.jpg" width="240" alt="Article on Android"> | <img src="docs/screenshots/android-weather.jpg" width="240" alt="Weather forecast on Android"> |
+
+<sub>iOS Simulator (iPhone 16 Pro) and Android Emulator (Pixel 7, Android 15),
+light theme, Spanish UI. The app also runs on a physical iPhone with iOS 27.</sub>
+
 ## Features
 
 - Front page with infinite scroll and section filter chips
