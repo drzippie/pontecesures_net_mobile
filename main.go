@@ -64,6 +64,7 @@ func main() {
 	}
 
 	app := application.New(opts)
+	bridgeLifecycle(app)
 
 	// On mobile the window colour is what shows behind the system bars.
 	windowColour := groundColour

@@ -1,4 +1,5 @@
 import Alpine from "alpinejs";
+import { Events } from "@wailsio/runtime";
 import intersect from "@alpinejs/intersect";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/source-sans-3";
@@ -13,6 +14,10 @@ import { applyPrefs, loadLocal, normalize, saveLocal, type Prefs } from "./lib/p
 import { href, isInternalPostLink, parseHash, type Route } from "./lib/router";
 import { dayDate, dayLabel, hourMinute, rainMax, skyIcon, skyText, windText } from "./lib/weather";
 import { attachZoom, largestSource } from "./lib/zoom";
+import { attachPullToRefresh, PULL_TRIGGER } from "./lib/pull";
+
+/** After this long in the background, the app refreshes when it comes back. */
+const RESUME_REFRESH_MS = 15 * 60 * 1000;
 
 /** Re-fetch the forecast when the copy shown is older than this. */
 const WEATHER_TTL_MS = 30 * 60 * 1000;
@@ -103,6 +108,11 @@ Alpine.data("app", () => ({
   lightbox: { open: false, src: "", alt: "", hint: false },
   detachZoom: null as null | (() => void),
 
+  /** Pull-to-refresh: current (damped) pull distance in px. */
+  pull: 0,
+  pullTrigger: PULL_TRIGGER,
+  hiddenAt: 0,
+
   toast: "",
   toastTimer: undefined as number | undefined,
 
@@ -111,9 +121,43 @@ Alpine.data("app", () => ({
     this.onRoute();
     // Called by the Android host (MainActivity.onBackPressed).
     window.pcnHandleBack = () => this.handleSystemBack();
+
+    attachPullToRefresh({
+      enabled: () => this.isListView && this.route.name !== "article" && !this.lightbox.open && !this.list.loading,
+      onPull: (d) => (this.pull = d),
+      onRefresh: () => {
+        this.refresh();
+        if (this.base.name === "home") this.loadWeather(true);
+      },
+    });
+
+    // Native lifecycle (lifecycle.go): the WebView's visibilitychange does not
+    // fire on Android, so rely on the app events, with visibilitychange as a
+    // fallback for desktop/browsers.
+    Events.On("app:foreground", (e) => this.onForeground(Number(e.data) || 0));
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") this.hiddenAt = Date.now();
+      else if (this.hiddenAt) this.onForeground(Date.now() - this.hiddenAt);
+    });
     this.loadCategories();
     this.loadWeather();
     this.syncSettings();
+  },
+
+  /**
+   * Refresh stale content when the app returns from the background.
+   * `away` comes from Go on mobile (lifecycle.go), or from visibilitychange
+   * on desktop/browsers.
+   */
+  onForeground(away: number) {
+    this.hiddenAt = 0;
+    if (away < RESUME_REFRESH_MS) return;
+    this.loadWeather(true);
+    // Only reload the list if the reader is near the top: never move content
+    // under someone who is reading.
+    if (this.isListView && this.route.name !== "article" && window.scrollY < 200 && this.base.name !== "search") {
+      this.refresh();
+    }
   },
 
   // ---------- settings ----------

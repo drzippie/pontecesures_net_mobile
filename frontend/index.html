@@ -55,6 +55,16 @@
          x-text="fmt(t.search.noResults, { q: search.ran })"></p>
     </div>
 
+    <!-- Pull-to-refresh indicator -->
+    <div x-show="isListView" class="flex justify-center overflow-hidden transition-[height] duration-150"
+         :style="'height:' + (pull > 0 ? pull : (list.loading && list.items.length && window.scrollY <= 0 ? 48 : 0)) + 'px'" aria-hidden="true">
+      <span class="mt-3 flex size-8 items-center justify-center rounded-full bg-surface shadow">
+        <svg class="size-5 text-verdemar" :class="(list.loading || pull >= pullTrigger) && 'animate-spin'"
+             :style="pull > 0 && pull < pullTrigger ? 'transform: rotate(' + (pull / pullTrigger) * 300 + 'deg)' : ''"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </span>
+    </div>
+
     <!-- ===== Post list (portada, sección, búsqueda) ===== -->
     <section x-show="isListView" class="px-4 pt-4 space-y-4">
       <h1 x-show="base.name === 'section' && sectionName" class="font-display text-2xl font-bold" x-text="sectionName"></h1>
