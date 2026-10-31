@@ -15,6 +15,9 @@ Galician).
 - Full-text search across ~30,000 articles
 - Article view with sanitised content; links to other articles open in-app,
   external links open in the system browser
+- Related posts under each article ("Más sobre esto")
+- Weather for Pontecesures from MeteoGalicia: a discreet line on the front
+  page and a forecast view (today by time slot, next days, warnings)
 - Native share sheet on mobile (copies the link on desktop)
 - Offline reading of anything already loaded (file cache)
 - Light & dark themes using the website's design tokens
@@ -57,7 +60,10 @@ architecture notes.
 ```
 main.go               App bootstrap (window, iOS/Android options)
 contentservice.go     Service bound to the frontend (posts, sections, share…)
-internal/wp/          WordPress client, HTML sanitising, image cascade, cache
+weatherservice.go     Service bound to the frontend (MeteoGalicia forecast)
+internal/wp/          WordPress client, HTML sanitising, image cascade, related
+internal/meteo/       MeteoGalicia forecast client
+internal/cache/       File cache for offline reading
 frontend/             Vite + Alpine.js + Tailwind UI
   src/i18n/es.ts      All UI strings (Spanish)
   bindings/           Generated Go → TS bindings (do not edit)

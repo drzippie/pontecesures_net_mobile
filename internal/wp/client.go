@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/drzippie/pontecesures_net_mobile/internal/cache"
 )
 
 // DefaultBaseURL is the production WordPress site.
@@ -27,7 +29,7 @@ const thumbWidth = 400
 type Client struct {
 	base      string
 	http      *http.Client
-	cache     *fileCache
+	cache     *cache.Store
 	userAgent string
 	pcn       pcnState
 }
@@ -54,10 +56,10 @@ func NewClient(o Options) *Client {
 	c := &Client{
 		base:      strings.TrimRight(o.BaseURL, "/"),
 		http:      &http.Client{Timeout: o.Timeout},
-		cache:     newFileCache(o.CacheDir),
+		cache:     cache.New(o.CacheDir),
 		userAgent: o.UserAgent,
 	}
-	go c.cache.prune(30 * 24 * time.Hour)
+	go c.cache.Prune(30 * 24 * time.Hour)
 	return c
 }
 
@@ -72,13 +74,13 @@ func (c *Client) fetch(ctx context.Context, path string, q url.Values) (body []b
 
 	body, total, pages, err = c.do(ctx, u)
 	if err == nil {
-		c.cache.put(u, cacheEntry{StoredAt: time.Now(), Body: body, Total: total, TotalPages: pages})
+		c.cache.Put(u, cache.Entry{StoredAt: time.Now(), Body: body, Total: total, TotalPages: pages})
 		return body, total, pages, false, nil
 	}
 	if errors.Is(err, ErrNotFound) {
 		return nil, 0, 0, false, err
 	}
-	if e, ok := c.cache.get(u); ok {
+	if e, ok := c.cache.Get(u); ok {
 		return e.Body, e.Total, e.TotalPages, true, nil
 	}
 	return nil, 0, 0, false, err

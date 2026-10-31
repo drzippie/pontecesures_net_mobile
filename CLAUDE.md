@@ -17,7 +17,9 @@ Wails v3 (v3.0.0, mobile support experimental) app for iOS/Android that shows
 the public content of pontecesures.net (WordPress). See `README.md`,
 `docs/DEVELOPMENT.md` and `docs/ROADMAP.md`.
 
-- Go backend: `main.go`, `contentservice.go`, `internal/wp/`
+- Go backend: `main.go`, `contentservice.go`, `weatherservice.go`,
+  `internal/wp/` (WordPress), `internal/meteo/` (MeteoGalicia),
+  `internal/cache/` (offline file cache)
 - Frontend: `frontend/` — Vite + TypeScript + **Alpine.js + Tailwind CSS v4**
   (do not introduce React/Vue/Svelte)
 - Optional WordPress plugin: `wordpress-plugin/pcn-mobile` (namespace
@@ -31,6 +33,8 @@ the public content of pontecesures.net (WordPress). See `README.md`,
   `internal/wp/images.go` (body image → section illustration). Keep it in sync
   with the theme's `inc/imaxes.php`.
 - Sanitise any HTML rendered with `x-html` in Go (`wp.SanitizeHTML`).
+- Weather codes follow MeteoGalicia's official annex (see
+  `docs/DEVELOPMENT.md`), not the website widget's table.
 - Platform-specific Go code goes behind `//go:build ios` / `//go:build android`
   (`ios` implies `darwin`, `android` implies `linux`). Prefer
   `application.Mobile` / `application.System.IsMobile()` in shared code.

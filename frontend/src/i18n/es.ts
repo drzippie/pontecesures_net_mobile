@@ -57,6 +57,24 @@ export const es = {
     version: "Versión {v}",
   },
 
+  weather: {
+    title: "El tiempo en Pontecesures",
+    today: "Hoy",
+    more: "Ver previsión",
+    periods: { morning: "Mañana", afternoon: "Tarde", night: "Noche" } as Record<string, string>,
+    rain: "Lluvia",
+    wind: "Viento",
+    uv: "Índice UV",
+    warning: "Aviso meteorológico activo",
+    warningMore: "Ver avisos en MeteoGalicia",
+    nextDays: "Próximos días",
+    source: "Datos: MeteoGalicia (Xunta de Galicia)",
+    updated: "Actualizado {time}",
+    offline: "Sin conexión: mostrando la última previsión guardada.",
+    unavailable: "Previsión no disponible",
+    loading: "Cargando previsión…",
+  },
+
   offline: "Sin conexión: mostrando noticias guardadas.",
   error: {
     generic: "No se ha podido cargar el contenido.",

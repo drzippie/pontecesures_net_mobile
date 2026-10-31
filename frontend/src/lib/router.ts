@@ -4,6 +4,7 @@
 //   #/secciones         section list
 //   #/buscar            search
 //   #/mas               about / links
+//   #/tiempo            weather forecast
 //   #/noticia/:id       article (rendered as an overlay over the last list)
 
 export type Route =
@@ -12,6 +13,7 @@ export type Route =
   | { name: "sections" }
   | { name: "search" }
   | { name: "more" }
+  | { name: "weather" }
   | { name: "article"; id: number };
 
 export function parseHash(hash: string): Route {
@@ -26,6 +28,8 @@ export function parseHash(hash: string): Route {
       return { name: "search" };
     case "mas":
       return { name: "more" };
+    case "tiempo":
+      return { name: "weather" };
     case "noticia":
       return id > 0 ? { name: "article", id } : { name: "home" };
     default:
@@ -43,6 +47,8 @@ export function href(r: Route): string {
       return "#/buscar";
     case "more":
       return "#/mas";
+    case "weather":
+      return "#/tiempo";
     case "article":
       return `#/noticia/${r.id}`;
     default:

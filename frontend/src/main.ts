@@ -4,11 +4,16 @@ import "@fontsource-variable/fraunces";
 import "@fontsource-variable/source-sans-3";
 import "./style.css";
 
-import { ContentService } from "../bindings/github.com/drzippie/pontecesures_net_mobile";
+import { ContentService, WeatherService } from "../bindings/github.com/drzippie/pontecesures_net_mobile";
+import type { Forecast } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/meteo/models";
 import type { Category, Post, PostSummary } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/wp/models";
 import { es, fmt } from "./i18n/es";
 import { longDate, number, relativeDate } from "./lib/format";
 import { href, isInternalPostLink, parseHash, type Route } from "./lib/router";
+import { dayDate, dayLabel, hourMinute, rainMax, skyIcon, skyText, windText } from "./lib/weather";
+
+/** Re-fetch the forecast when the copy shown is older than this. */
+const WEATHER_TTL_MS = 30 * 60 * 1000;
 
 const APP_VERSION = "0.1.0";
 const SITE = "https://pontecesures.net";
@@ -80,6 +85,8 @@ Alpine.data("app", () => ({
   article: { id: 0, data: null as Post | PostSummary | null, full: false, loading: false, error: "" },
   /** "Más sobre esto" under the open article. */
   related: { id: 0, items: [] as PostSummary[], loading: false },
+  weather: { data: null as Forecast | null, loading: false, error: false, loadedAt: 0 },
+
   toast: "",
   toastTimer: undefined as number | undefined,
 
@@ -87,6 +94,7 @@ Alpine.data("app", () => ({
     window.addEventListener("hashchange", () => this.onRoute(true));
     this.onRoute(false);
     this.loadCategories();
+    this.loadWeather();
   },
 
   // ---------- navigation ----------
@@ -125,6 +133,7 @@ Alpine.data("app", () => ({
     // overlay), so only restore the position when switching between lists.
     if (prev.name !== "article") this.$nextTick(() => window.scrollTo(0, list?.scrollY ?? 0));
     if (r.name === "search") this.$nextTick(() => (this.$refs.searchInput as HTMLInputElement)?.focus());
+    if (r.name === "weather" || r.name === "home") this.loadWeather();
   },
 
   get currentCategory(): number {
@@ -214,6 +223,38 @@ Alpine.data("app", () => ({
   clearSearch() {
     Object.assign(this.search, emptyList(), { q: "", ran: "" });
     (this.$refs.searchInput as HTMLInputElement)?.focus();
+  },
+
+  // ---------- weather ----------
+
+  async loadWeather(force = false) {
+    const w = this.weather;
+    if (w.loading) return;
+    if (!force && w.data && Date.now() - w.loadedAt < WEATHER_TTL_MS) return;
+    w.loading = true;
+    try {
+      w.data = await WeatherService.Forecast();
+      w.error = false;
+      w.loadedAt = Date.now();
+    } catch {
+      w.error = true;
+    } finally {
+      w.loading = false;
+    }
+  },
+
+  get today() {
+    return this.weather.data?.days?.[0] ?? null;
+  },
+
+  skyText,
+  skyIcon,
+  windText,
+  rainMax,
+  dayDate,
+  hourMinute,
+  dayLabel(date: string): string {
+    return dayLabel(date, es.weather.today);
   },
 
   // ---------- article ----------
@@ -310,7 +351,8 @@ Alpine.data("app", () => ({
   },
 
   isTab(name: string): boolean {
-    const n = this.base.name === "section" ? "home" : this.base.name;
+    // Sections and the weather view are reached from the front page.
+    const n = this.base.name === "section" || this.base.name === "weather" ? "home" : this.base.name;
     return n === name;
   },
 }));

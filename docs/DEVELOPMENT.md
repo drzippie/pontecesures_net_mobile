@@ -115,10 +115,32 @@ website's "Máis sobre isto".
   category. Posts tagged only with generic tags ("Pontecesures", "Concello")
   get recent posts of those tags, which is also what the website does.
 
+## Weather
+
+Source: MeteoGalicia (Xunta de Galicia), the same public endpoint the website
+uses — `https://servizos.meteogalicia.gal/mgrss/predicion/jsonPredConcellos.action?idConc=36044`
+(no API key; 36044 = Pontecesures). Spec and code tables:
+[JSON_Pred_Concello_gl.pdf](https://www.meteogalicia.gal/datosred/infoweb/meteo/docs/rss/JSON_Pred_Concello_gl.pdf).
+
+- `internal/meteo` parses 3–4 days with morning/afternoon/night slots. `-9999`
+  ("not available") becomes `null`. Responses are cached for 30 minutes and
+  served stale when offline.
+- Go returns codes; Spanish texts live in `frontend/src/lib/weather.ts`
+  (annex II sky codes 101–125 day / 201–225 night, annex III wind 299–332).
+  Icons are MeteoGalicia's official SVGs
+  (`https://www.meteogalicia.gal/web/assets/icons/svg/<code>.svg`), so they
+  need a connection; the text is always shown.
+- UI: one discreet line on the front page (today's icon, max/min, max rain
+  probability) that opens `#/tiempo` with today's slots, UV index, next days,
+  active warnings and the attribution.
+- The website widget (`class-weather-widget.php`) maps codes with its own
+  table that does not match the official annex (e.g. it shows night code 201,
+  "clear", as "Choiva escasa"). The app follows the official annex.
+
 ## Frontend
 
 - Hash router (`src/lib/router.ts`): `#/`, `#/seccion/:id`, `#/secciones`,
-  `#/buscar`, `#/mas`, `#/noticia/:id`. The article is an overlay so the list
+  `#/buscar`, `#/mas`, `#/tiempo`, `#/noticia/:id`. The article is an overlay so the list
   keeps its scroll position.
 - One root Alpine component (`app` in `src/main.ts`).
 - Design tokens (colors, Fraunces + Source Sans 3) copied from the website

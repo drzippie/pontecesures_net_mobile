@@ -31,6 +31,7 @@ func main() {
 		Description: "Las noticias de Pontecesures en tu móvil",
 		Services: []application.Service{
 			application.NewService(&ContentService{}),
+			application.NewService(&WeatherService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

@@ -31,7 +31,7 @@ type ContentService struct {
 // path is available.
 func (s *ContentService) ServiceStartup(ctx context.Context, _ application.ServiceOptions) error {
 	s.client = wp.NewClient(wp.Options{
-		CacheDir:  cacheDir(),
+		CacheDir:  cacheDir("wp-cache"),
 		UserAgent: "PontecesuresNetMobile/" + appVersion,
 	})
 	// Light status bar icons over the dark app chrome (no-op on desktop).
@@ -39,12 +39,14 @@ func (s *ContentService) ServiceStartup(ctx context.Context, _ application.Servi
 	return nil
 }
 
-func cacheDir() string {
+// cacheDir returns a per-feature cache directory: the app's private storage
+// on mobile, the user cache directory on desktop.
+func cacheDir(name string) string {
 	if dir := application.Mobile.StoragePath(); dir != "" {
-		return filepath.Join(dir, "wp-cache")
+		return filepath.Join(dir, name)
 	}
 	if dir, err := os.UserCacheDir(); err == nil {
-		return filepath.Join(dir, "pontecesures_net_mobile", "wp-cache")
+		return filepath.Join(dir, "pontecesures_net_mobile", name)
 	}
 	return ""
 }
