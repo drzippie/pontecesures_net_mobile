@@ -74,9 +74,14 @@ Primera versión de la aplicación de Pontecesures.net.
 
 ### Screenshots
 
-iPhone 6.9" (1320 × 2868), in this order, from `docs/store/screenshots-6.9/`.
-App Store Connect scales them down for smaller iPhones. Taken on the iOS
-Simulator (iPhone 16 Pro Max) with the status bar overridden to 9:41.
+In this order, from the folder matching the size App Store Connect asks
+for (it lists the accepted sizes under each drop zone; in October 2026 the
+iPhone slot asked for 6.1"/6.3" sizes):
+
+- `docs/store/screenshots-6.3/` — 1206 × 2622 (iPhone 16 Pro simulator)
+- `docs/store/screenshots-6.9/` — 1320 × 2868 (iPhone 16 Pro Max simulator)
+
+Taken on the iOS Simulator with the status bar overridden to 9:41.
 
 1. `01-portada.jpg` — front page with the weather line
 2. `02-noticia.jpg` — article
