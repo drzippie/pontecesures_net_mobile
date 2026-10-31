@@ -10,7 +10,7 @@ import (
 )
 
 // appVersion is reported in the User-Agent sent to pontecesures.net.
-const appVersion = "0.1.1"
+const appVersion = "0.1.2"
 
 // The built frontend (frontend/dist) is embedded into the binary and served
 // in-process on every platform (no localhost server on mobile).

@@ -216,7 +216,23 @@ The mapping lives in `internal/wp/images.go`. The plugin exposes the same
 data at `GET /wp-json/pcn/v1/illustrations` so the app can fetch it once the
 plugin is deployed — keep both in sync with the theme until then.
 
-## Related posts
+## Third-party content in articles
+
+`wp.SanitizeHTML` keeps what the WebView contacts in line with the privacy
+policy (https://pontecesures.net/privacidad-app/) and the "no data
+collected" App Store label:
+
+- Images from ad/tracking hosts (adnxs, Criteo, DoubleClick…) are dropped;
+  some old posts copied from other media carry their tracking pixels.
+- Embedded players become links opened outside the app. YouTube refuses to
+  play embeds without a web Referer (error 153), which pages served from the
+  `wails://` scheme cannot send; YouTube embeds become the video thumbnail
+  with a play button (`a.pcn-video`), Vimeo and Facebook embeds a plain
+  link.
+- Images hot-linked from other news sites are kept (the policy mentions
+  them).
+
+
 
 Under each article the app shows "Más sobre esto" (4 posts), like the
 website's "Máis sobre isto".

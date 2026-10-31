@@ -59,17 +59,45 @@ func TestIllustrationFallback(t *testing.T) {
 }
 
 func TestSanitizeHTML(t *testing.T) {
-	in := `<p onclick="x()">Ola<script>alert(1)</script></p><img class="e-vertical" src="http://pontecesures.net/i.jpg"><iframe src="https://evil.example/"></iframe><iframe src="https://www.youtube.com/embed/abc"></iframe>`
+	in := `<p onclick="x()">Ola<script>alert(1)</script></p><img class="e-vertical" src="http://pontecesures.net/i.jpg"><iframe src="https://evil.example/"></iframe><iframe src="https://www.youtube.com/embed/abc123"></iframe>`
 	out := SanitizeHTML(in)
 	for _, bad := range []string{"onclick", "<script", "evil.example", `src="http://`} {
 		if strings.Contains(out, bad) {
 			t.Errorf("sanitised output contains %q: %s", bad, out)
 		}
 	}
-	for _, good := range []string{"e-vertical", "youtube.com/embed/abc"} {
+	for _, good := range []string{"e-vertical", `href="https://www.youtube.com/watch?v=abc123"`} {
 		if !strings.Contains(out, good) {
 			t.Errorf("sanitised output lost %q: %s", good, out)
 		}
+	}
+}
+
+func TestSanitizeHTMLLimitsThirdParties(t *testing.T) {
+	in := `<p>Ola</p>` +
+		`<img src="https://shftr.adnxs.net/r?url=https%3A%2F%2Fimageproxy.eu.criteo.net%2Fx.jpg" alt="">` +
+		`<img src="https://img.lavdg.com/foto.jpg" alt="foto">` +
+		`<iframe width="560" height="315" src="https://www.youtube.com/embed/91TrFLnnYMc?feature=oembed" allowfullscreen></iframe>` +
+		`<iframe src="https://player.vimeo.com/video/123?h=abc"></iframe>` +
+		`<iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fconcello%2Fvideos%2F42%2F&show_text=0" width="560"></iframe>`
+	out := SanitizeHTML(in)
+	for _, bad := range []string{"adnxs", "criteo", "<iframe"} {
+		if strings.Contains(out, bad) {
+			t.Errorf("output still contains %q: %s", bad, out)
+		}
+	}
+	for _, good := range []string{
+		"img.lavdg.com/foto.jpg",
+		`<a class="pcn-video" href="https://www.youtube.com/watch?v=91TrFLnnYMc"><img src="https://i.ytimg.com/vi/91TrFLnnYMc/hqdefault.jpg"`,
+		`<a href="https://vimeo.com/123">Vimeo ↗</a>`,
+		`<a href="https://www.facebook.com/concello/videos/42/">Facebook ↗</a>`,
+	} {
+		if !strings.Contains(out, good) {
+			t.Errorf("output lacks %q: %s", good, out)
+		}
+	}
+	if img := FirstImage(in, 600); img == nil || !strings.Contains(img.URL, "img.lavdg.com") {
+		t.Errorf("FirstImage should skip the tracking pixel, got %+v", img)
 	}
 }
 

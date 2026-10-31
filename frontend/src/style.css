@@ -162,8 +162,21 @@ html[data-text-size="xlarge"] {
   & img.e-vertical {
     @apply max-h-[80vh] w-auto object-contain;
   }
-  & iframe {
-    @apply w-full aspect-video rounded-lg;
+  /* Embedded videos arrive as a thumbnail linking to YouTube (see
+     internal/wp/html.go); a play button marks them. */
+  & a.pcn-video {
+    @apply relative block;
+  }
+  & a.pcn-video img {
+    @apply w-full aspect-video object-cover cursor-pointer;
+  }
+  & a.pcn-video::after {
+    content: "";
+    @apply absolute left-1/2 top-1/2 size-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/70;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 55% 50%;
+    background-size: 55%;
   }
   & figure {
     @apply my-6;

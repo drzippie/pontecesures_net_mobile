@@ -2,6 +2,7 @@ package wp
 
 import (
 	"html"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,8 +17,24 @@ var (
 	attrRe     = regexp.MustCompile(`(?is)\b(src|srcset|width|height|alt)\s*=\s*("([^"]*)"|'([^']*)')`)
 	readMoreRe = regexp.MustCompile(`(?i)\s*(\[(&hellip;|…|\.\.\.)\]|Continue reading.*|Ler máis.*|Leer más.*)$`)
 
-	// Iframes are only allowed from well-known video providers.
+	// Iframes are only kept from well-known video providers, and only long
+	// enough to be turned into links (replaceEmbed).
 	embedSrcRe = regexp.MustCompile(`^https://(www\.)?(youtube\.com|youtube-nocookie\.com|player\.vimeo\.com|www\.facebook\.com)/`)
+
+	// Ad and tracking hosts. Old posts copied from other media sometimes
+	// carry their tracking pixels; images from these hosts are dropped so the
+	// app never contacts them (the privacy policy and the App Store privacy
+	// label say the app does no tracking).
+	trackerHosts = `(?:[a-z0-9-]+\.)*(?:adnxs\.(?:com|net)|criteo\.(?:com|net)|doubleclick\.net|googlesyndication\.com|googleadservices\.com|google-analytics\.com|googletagmanager\.com|scorecardresearch\.com|quantserve\.com|outbrain\.com|taboola\.com|chartbeat\.(?:com|net)|amazon-adsystem\.com|adsrvr\.org|rubiconproject\.com|pubmatic\.com|smartadserver\.com|facebook\.com/tr)`
+	trackerURLRe = regexp.MustCompile(`(?i)^(?:https?:)?//` + trackerHosts + `(?:[/?#:]|$)`)
+	trackerImgRe = regexp.MustCompile(`(?is)<img\b[^>]*\bsrc="(?:https?:)?//` + trackerHosts + `(?:[/?#:"])[^>]*>`)
+
+	// Embedded players (iframes left by the sanitiser) and the IDs in them.
+	iframeRe      = regexp.MustCompile(`(?is)<iframe\b([^>]*)>\s*</iframe>`)
+	iframeSrcRe   = regexp.MustCompile(`(?i)\bsrc="([^"]*)"`)
+	iframeTitleRe = regexp.MustCompile(`(?i)\btitle="([^"]*)"`)
+	youtubeIDRe   = regexp.MustCompile(`^https://(?:www\.)?youtube(?:-nocookie)?\.com/embed/([A-Za-z0-9_-]{6,20})`)
+	vimeoIDRe     = regexp.MustCompile(`^https://player\.vimeo\.com/video/([0-9]+)`)
 
 	policy = newPolicy()
 )
@@ -39,11 +56,56 @@ func newPolicy() *bluemonday.Policy {
 
 // SanitizeHTML removes scripts, inline handlers, styles and any element not
 // explicitly allowed. The result is safe to render with x-html.
+//
+// It also limits which third parties the WebView contacts: tracking pixels
+// are dropped and embedded players become links (see replaceEmbeds).
 func SanitizeHTML(s string) string {
 	out := policy.Sanitize(s)
 	// Old posts embed http:// media, which iOS blocks (ATS).
 	out = strings.ReplaceAll(out, `src="http://`, `src="https://`)
+	out = trackerImgRe.ReplaceAllString(out, "")
+	out = iframeRe.ReplaceAllStringFunc(out, replaceEmbed)
 	return strings.TrimSpace(out)
+}
+
+// replaceEmbed turns an embedded player into a link opened outside the app.
+// YouTube refuses to play embeds without a web Referer (error 153), which a
+// page served from the wails:// scheme cannot send, and Facebook embeds load
+// Facebook's scripts and cookies. YouTube links keep the video thumbnail
+// (class pcn-video adds a play button); the frontend opens external links
+// in the YouTube app or the browser. Brand names need no translation.
+func replaceEmbed(tag string) string {
+	attrs := iframeRe.FindStringSubmatch(tag)[1]
+	m := iframeSrcRe.FindStringSubmatch(attrs)
+	if m == nil {
+		return ""
+	}
+	src := html.UnescapeString(m[1])
+	title := ""
+	if t := iframeTitleRe.FindStringSubmatch(attrs); t != nil {
+		title = t[1] // already escaped by the sanitiser
+	}
+	if id := youtubeIDRe.FindStringSubmatch(src); id != nil {
+		alt := title
+		if alt == "" {
+			alt = "YouTube"
+		}
+		return `<p><a class="pcn-video" href="https://www.youtube.com/watch?v=` + id[1] + `">` +
+			`<img src="https://i.ytimg.com/vi/` + id[1] + `/hqdefault.jpg" alt="` + alt + `" loading="lazy"></a></p>`
+	}
+	if id := vimeoIDRe.FindStringSubmatch(src); id != nil {
+		return `<p><a href="https://vimeo.com/` + id[1] + `">Vimeo ↗</a></p>`
+	}
+	if strings.HasPrefix(src, "https://www.facebook.com/") {
+		target := src
+		if u, err := url.Parse(src); err == nil {
+			if h := u.Query().Get("href"); strings.HasPrefix(h, "https://") {
+				target = h
+			}
+		}
+		return `<p><a href="` + html.EscapeString(target) + `">Facebook ↗</a></p>`
+	}
+	return ""
 }
 
 // PlainText strips tags, decodes entities and collapses whitespace.
@@ -95,7 +157,7 @@ func parseImg(tag string, targetWidth int) *Image {
 		attrs[strings.ToLower(m[1])] = html.UnescapeString(v)
 	}
 	src := secureURL(attrs["src"])
-	if src == "" || skipImageRe.MatchString(src) {
+	if src == "" || skipImageRe.MatchString(src) || trackerURLRe.MatchString(src) {
 		return nil
 	}
 	img := &Image{URL: src, Alt: attrs["alt"]}
