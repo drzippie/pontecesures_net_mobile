@@ -16,8 +16,14 @@ const appVersion = "0.1.0"
 //go:embed all:frontend/dist
 var assets embed.FS
 
-// Brand background, shown before the WebView paints (avoids a white flash).
-var background = application.NewRGB(247, 246, 243) // --ground
+// chromeColour is the masthead/tab-bar colour (--color-chrome in style.css).
+// On iOS the WebView is laid out inside the safe area, so the native
+// background shows behind the status bar and the home indicator: painting it
+// with the chrome colour makes the bars blend with the app header and tab bar.
+var chromeColour = application.NewRGB(27, 58, 75)
+
+// groundColour is the page background (--ground), used on desktop.
+var groundColour = application.NewRGB(247, 246, 243)
 
 func main() {
 	opts := application.Options{
@@ -33,18 +39,24 @@ func main() {
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
 		IOS: application.IOSOptions{
-			BackgroundColour:            background,
+			BackgroundColour:            chromeColour,
 			DisableLinkPreview:          true,
 			EnableInlineMediaPlayback:   true,
 			ApplicationNameForUserAgent: "PontecesuresNetMobile/" + appVersion,
 		},
 		Android: application.AndroidOptions{
 			DisableOverscroll: true,
-			BackgroundColour:  background,
+			BackgroundColour:  chromeColour,
 		},
 	}
 
 	app := application.New(opts)
+
+	// On mobile the window colour is what shows behind the system bars.
+	windowColour := groundColour
+	if application.System.IsMobile() {
+		windowColour = chromeColour
+	}
 
 	// On desktop the window mimics a phone so the mobile layout can be
 	// developed with `wails3 dev`. On mobile, size and title are ignored.
@@ -53,7 +65,7 @@ func main() {
 		Width:            420,
 		Height:           860,
 		MinWidth:         360,
-		BackgroundColour: background,
+		BackgroundColour: windowColour,
 		URL:              "/",
 	})
 

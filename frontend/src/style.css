@@ -35,6 +35,10 @@
 }
 
 @theme inline {
+  /* App chrome (masthead, tab bar). Fixed in both themes because it must
+     match the native background painted behind the iOS/Android system bars
+     (main.go: chromeColour). */
+  --color-chrome: #1b3a4b;
   --color-estuario: var(--estuario);
   --color-ground: var(--ground);
   --color-surface: var(--surface);

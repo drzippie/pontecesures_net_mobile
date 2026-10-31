@@ -10,7 +10,7 @@
 <body x-data="app" x-cloak>
 
   <!-- ===== Masthead ===== -->
-  <header class="sticky top-0 z-30 bg-estuario text-white pt-safe shadow-sm">
+  <header class="sticky top-0 z-30 bg-chrome text-white pt-safe shadow-sm">
     <div class="flex items-center gap-3 px-4 h-13">
       <button type="button" class="flex items-baseline gap-2 font-display font-bold text-[1.32rem] tracking-tight"
               @click="go({ name: 'home' }); window.scrollTo({ top: 0, behavior: 'smooth' })">
@@ -26,10 +26,10 @@
     <!-- Section chips (portada / sección) -->
     <nav class="flex gap-2 overflow-x-auto no-scrollbar px-4 pb-3" x-show="(base.name === 'home' || base.name === 'section') && categories.length">
       <a :href="'#/'" class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors"
-         :class="currentCategory === 0 ? 'bg-white text-estuario' : 'bg-white/10 text-white'" x-text="t.feed.all"></a>
+         :class="currentCategory === 0 ? 'bg-white text-chrome' : 'bg-white/10 text-white'" x-text="t.feed.all"></a>
       <template x-for="c in categories.slice(0, 14)" :key="c.id">
         <a :href="'#/seccion/' + c.id" class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors"
-           :class="currentCategory === c.id ? 'bg-white text-estuario' : 'bg-white/10 text-white'" x-text="c.name"
+           :class="currentCategory === c.id ? 'bg-white text-chrome' : 'bg-white/10 text-white'" x-text="c.name"
            x-effect="currentCategory === c.id && $el.scrollIntoView({ inline: 'center', block: 'nearest' })"></a>
       </template>
     </nav>
@@ -161,7 +161,7 @@
        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
        class="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground">
-    <div class="sticky top-0 z-10 bg-estuario/95 backdrop-blur text-white pt-safe">
+    <div class="sticky top-0 z-10 bg-chrome text-white pt-safe">
       <div class="flex items-center justify-between px-2 h-13">
         <button type="button" class="flex items-center gap-1 px-2 py-2 rounded-full active:bg-white/10" @click="back()">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
@@ -222,7 +222,7 @@
   </div>
 
   <!-- ===== Bottom tab bar ===== -->
-  <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 backdrop-blur pb-safe">
+  <nav class="fixed inset-x-0 bottom-0 z-30 bg-chrome pb-safe">
     <div class="grid grid-cols-4">
       <template x-for="tab in [
           { name: 'home', hash: '#/', label: t.tabs.home, icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
@@ -231,7 +231,7 @@
           { name: 'more', hash: '#/mas', label: t.tabs.more, icon: 'M5 12h.01M12 12h.01M19 12h.01' },
         ]" :key="tab.name">
         <a :href="tab.hash" class="flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[.7rem] font-semibold"
-           :class="isTab(tab.name) ? 'text-verdemar' : 'text-muted'"
+           :class="isTab(tab.name) ? 'text-white' : 'text-white/55'"
            @click="isTab(tab.name) && route.name !== 'article' && window.scrollTo({ top: 0, behavior: 'smooth' })">
           <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="tab.icon"/></svg>
           <span x-text="tab.label"></span>

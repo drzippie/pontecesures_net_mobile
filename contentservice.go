@@ -34,6 +34,8 @@ func (s *ContentService) ServiceStartup(ctx context.Context, _ application.Servi
 		CacheDir:  cacheDir(),
 		UserAgent: "PontecesuresNetMobile/" + appVersion,
 	})
+	// Light status bar icons over the dark app chrome (no-op on desktop).
+	application.Mobile.SetStatusBar(`{"style":"light"}`)
 	return nil
 }
 

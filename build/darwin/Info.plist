@@ -6,7 +6,7 @@
         <key>CFBundleName</key>
             <string>Pontecesures.net</string>
         <key>CFBundleExecutable</key>
-            <string>pontecesures_net_mobile</string>
+            <string>pontecesures-net-mobile</string>
         <key>CFBundleIdentifier</key>
             <string>net.pontecesures.app</string>
         <key>CFBundleVersion</key>
