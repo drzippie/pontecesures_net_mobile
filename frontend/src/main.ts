@@ -416,6 +416,8 @@ Alpine.data("app", () => ({
     this.$nextTick(() => {
       const el = this.$refs.articleScroll as HTMLElement | undefined;
       if (el) el.scrollTop = 0;
+      // Screen readers start reading at the article title.
+      (this.$refs.articleTitle as HTMLElement | undefined)?.focus({ preventScroll: true });
     });
     try {
       const post = await ContentService.Post(id);
@@ -448,6 +450,7 @@ Alpine.data("app", () => ({
       const big = this.$refs.lightboxImg as HTMLImageElement;
       this.detachZoom?.();
       this.detachZoom = attachZoom(box, big);
+      (this.$refs.lightboxClose as HTMLElement | undefined)?.focus();
     });
   },
 

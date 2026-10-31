@@ -10,14 +10,14 @@
 <body x-data="app" x-cloak>
 
   <!-- ===== Masthead ===== -->
-  <header class="sticky top-0 z-30 bg-chrome text-white pt-safe shadow-sm">
+  <header class="sticky top-0 z-30 bg-chrome text-white pt-safe shadow-sm" :inert="route.name === 'article' || lightbox.open">
     <div class="flex items-center gap-3 px-4 h-13">
       <button type="button" class="flex items-baseline gap-2 font-display font-bold text-[1.32rem] tracking-tight"
               @click="go({ name: 'home' }); window.scrollTo({ top: 0, behavior: 'smooth' })">
         <span>Pontecesures<span class="text-tella">.</span>net</span>
         <small class="font-sans font-normal text-[.62rem] uppercase tracking-[.14em] opacity-70" x-text="t.since"></small>
       </button>
-      <button type="button" class="ml-auto p-2 -mr-2 rounded-full active:bg-white/10" x-show="isListView && base.name !== 'search'"
+      <button type="button" class="ml-auto -mr-2 flex size-11 items-center justify-center rounded-full active:bg-white/10" x-show="isListView && base.name !== 'search'"
               :aria-label="t.feed.refresh" @click="refresh()">
         <svg class="size-5" :class="list.loading && 'animate-spin'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
@@ -26,16 +26,16 @@
     <!-- Section chips (portada / sección) -->
     <nav class="flex gap-2 overflow-x-auto no-scrollbar px-4 pb-3" x-show="(base.name === 'home' || base.name === 'section') && categories.length">
       <a :href="'#/'" class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors"
-         :class="currentCategory === 0 ? 'bg-white text-chrome' : 'bg-white/10 text-white'" x-text="t.feed.all"></a>
+         :class="currentCategory === 0 ? 'bg-white text-chrome' : 'bg-white/10 text-white'" :aria-current="currentCategory === 0 ? 'page' : null" x-text="t.feed.all"></a>
       <template x-for="c in categories.slice(0, 14)" :key="c.id">
         <a :href="'#/seccion/' + c.id" class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors"
-           :class="currentCategory === c.id ? 'bg-white text-chrome' : 'bg-white/10 text-white'" x-text="c.name"
+           :class="currentCategory === c.id ? 'bg-white text-chrome' : 'bg-white/10 text-white'" :aria-current="currentCategory === c.id ? 'page' : null" x-text="c.name"
            x-effect="currentCategory === c.id && $el.scrollIntoView({ inline: 'center', block: 'nearest' })"></a>
       </template>
     </nav>
   </header>
 
-  <main class="pb-[calc(4.5rem+var(--sa-bottom))]">
+  <main class="pb-[calc(4.5rem+var(--sa-bottom))]" :inert="route.name === 'article' || lightbox.open">
 
     <!-- ===== Search box ===== -->
     <div x-show="base.name === 'search'" class="px-4 pt-4">
@@ -43,8 +43,8 @@
         <svg class="size-5 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input x-ref="searchInput" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off"
                class="flex-1 bg-transparent outline-none text-base placeholder:text-muted"
-               :placeholder="t.search.placeholder" x-model="search.q" @input="onSearchInput()" @keydown.enter="$el.blur()" />
-        <button type="button" x-show="search.q" @click="clearSearch()" class="p-1 text-muted" :aria-label="t.search.clear">
+               :placeholder="t.search.placeholder" :aria-label="t.search.placeholder" x-model="search.q" @input="onSearchInput()" @keydown.enter="$el.blur()" />
+        <button type="button" x-show="search.q" @click="clearSearch()" class="-mr-2 flex size-11 items-center justify-center text-muted" :aria-label="t.search.clear">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </label>
@@ -189,7 +189,7 @@
     <section x-show="base.name === 'weather'" class="px-4 pt-4 space-y-5">
       <div class="flex items-center justify-between gap-3">
         <h1 class="font-display text-2xl font-bold" x-text="t.weather.title"></h1>
-        <button type="button" class="p-2 -mr-2 rounded-full text-muted active:bg-line-soft" :aria-label="t.feed.refresh" @click="loadWeather(true)">
+        <button type="button" class="-mr-2 flex size-11 items-center justify-center rounded-full text-muted active:bg-line-soft" :aria-label="t.feed.refresh" @click="loadWeather(true)">
           <svg class="size-5" :class="weather.loading && 'animate-spin'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
         </button>
       </div>
@@ -372,20 +372,20 @@
   <div x-show="route.name === 'article'" x-ref="articleScroll"
        x-transition:enter="transition ease-out duration-200" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
-       class="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground">
+       class="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground" :inert="lightbox.open">
     <div class="sticky top-0 z-10 bg-chrome text-white pt-safe">
       <div class="flex items-center justify-between px-2 h-13">
-        <button type="button" class="flex items-center gap-1 px-2 py-2 rounded-full active:bg-white/10" @click="back()">
+        <button type="button" class="flex min-h-11 items-center gap-1 rounded-full px-2 active:bg-white/10" @click="back()">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
           <span class="font-semibold" x-text="t.article.back"></span>
         </button>
         <div class="flex items-center">
-        <button type="button" class="p-2 rounded-full active:bg-white/10" x-show="article.data"
+        <button type="button" class="flex size-11 items-center justify-center rounded-full active:bg-white/10" x-show="article.data"
                 :aria-label="article.data && isSaved(article.data.id) ? t.article.unsave : t.article.save"
                 :aria-pressed="article.data && isSaved(article.data.id)" @click="toggleSaved()">
           <svg class="size-5" viewBox="0 0 24 24" :fill="article.data && isSaved(article.data.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </button>
-        <button type="button" class="p-2 rounded-full active:bg-white/10" :aria-label="t.article.share" @click="share()" x-show="article.data">
+        <button type="button" class="flex size-11 items-center justify-center rounded-full active:bg-white/10" :aria-label="t.article.share" @click="share()" x-show="article.data">
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
         </button>
         </div>
@@ -403,7 +403,7 @@
         </template>
         <div class="px-4 pt-5">
           <p class="text-xs font-semibold uppercase tracking-wider text-tella" x-text="mainCategory(article.data)"></p>
-          <h1 class="mt-1 font-display text-[1.75rem] font-bold leading-tight" x-text="article.data.title"></h1>
+          <h1 x-ref="articleTitle" tabindex="-1" class="mt-1 font-display text-[1.75rem] font-bold leading-tight outline-none" x-text="article.data.title"></h1>
           <p class="mt-3 text-sm text-muted">
             <span class="first-letter:uppercase inline-block" x-text="longDate(article.data.date)"></span>
             <template x-if="article.data.author"><span class="block" x-text="fmt(t.article.by, { author: article.data.author })"></span></template>
@@ -469,7 +469,7 @@
 
   <!-- ===== Bottom tab bar ===== -->
   <!-- Above the article overlay (z-40) so it is always reachable. -->
-  <nav class="fixed inset-x-0 bottom-0 z-50 bg-chrome pb-safe">
+  <nav class="fixed inset-x-0 bottom-0 z-50 bg-chrome pb-safe" :inert="lightbox.open" :aria-label="t.tabs.home">
     <div class="grid grid-cols-4">
       <template x-for="tab in [
           { name: 'home', hash: '#/', label: t.tabs.home, icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
@@ -478,7 +478,7 @@
           { name: 'more', hash: '#/mas', label: t.tabs.more, icon: 'M5 12h.01M12 12h.01M19 12h.01' },
         ]" :key="tab.name">
         <a :href="tab.hash" class="flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[.7rem] font-semibold"
-           :class="isTab(tab.name) ? 'text-white' : 'text-white/55'"
+           :class="isTab(tab.name) ? 'text-white' : 'text-white/70'" :aria-current="isTab(tab.name) ? 'page' : null"
            @click="isTab(tab.name) && route.name !== 'article' && window.scrollTo({ top: 0, behavior: 'smooth' })">
           <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="tab.icon"/></svg>
           <span x-text="tab.label"></span>
@@ -493,8 +493,8 @@
        style="touch-action: none" role="dialog" aria-modal="true" :aria-label="lightbox.alt || t.article.closeImage">
     <img x-ref="lightboxImg" :src="lightbox.src" :alt="lightbox.alt" draggable="false"
          class="max-h-full max-w-full object-contain will-change-transform" />
-    <button type="button" @click="closeLightbox()" :aria-label="t.article.closeImage"
-            class="absolute right-3 rounded-full bg-black/60 p-2.5 text-white" style="top: calc(var(--sa-top) + 0.75rem)">
+    <button type="button" x-ref="lightboxClose" @click="closeLightbox()" :aria-label="t.article.closeImage"
+            class="absolute right-3 flex size-11 items-center justify-center rounded-full bg-black/60 text-white" style="top: calc(var(--sa-top) + 0.75rem)">
       <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
     <p x-show="lightbox.hint" x-transition.opacity.duration.400ms class="pointer-events-none absolute inset-x-0 text-center text-xs text-white/70" style="bottom: calc(var(--sa-bottom) + 1rem)" x-text="t.article.imageHint"></p>

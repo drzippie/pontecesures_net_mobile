@@ -22,8 +22,10 @@
   --muted: #5e6b75;
   --line: #dddcd6;
   --line-soft: #eae9e3;
-  --tella: #c15f3c;
-  --verdemar: #2e7d8f;
+  /* tella and verdemar are slightly darker than the website's (#c15f3c,
+     #2e7d8f) so small text meets WCAG AA (4.5:1) on every light background. */
+  --tella: #aa5131;
+  --verdemar: #287182;
   --granate: #8c5a6b;
 }
 
@@ -165,5 +167,17 @@ html[data-text-size="xlarge"] {
   }
   & figure {
     @apply my-6;
+  }
+}
+
+/* Respect the system "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
