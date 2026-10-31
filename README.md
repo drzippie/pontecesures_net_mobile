@@ -68,4 +68,6 @@ docs/                 Roadmap and development notes
 
 ## License
 
-All rights reserved © Pontecesures.net. Content belongs to its authors.
+Code released under the [MIT License](LICENSE). News content and images shown
+in the app belong to pontecesures.net and their authors and are not covered by
+this license.
