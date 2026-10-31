@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Development signing helper for `wails3 task device:ios`.
+"""Signing helper for `wails3 task device:ios` and `wails3 task store:ios`.
 
 Usage:
   ios_signing.py identity <profile.mobileprovision>
       Prints the SHA-1 of the keychain code-signing identity whose
       certificate is included in the provisioning profile.
   ios_signing.py entitlements <profile.mobileprovision> <bundle id> <out.plist>
-      Writes development entitlements derived from the profile (App ID
-      prefix, team id, keychain group, get-task-allow).
+      Writes the entitlements to sign with, derived from the profile (App ID
+      prefix, team id, keychain group). Development profiles get
+      get-task-allow (debugger attach); App Store profiles get
+      beta-reports-active (TestFlight) instead.
 """
 import hashlib
 import plistlib
@@ -36,12 +38,15 @@ def entitlements(profile_path, bundle_id, out_path):
     prefix = profile["ApplicationIdentifierPrefix"][0]
     team = profile["TeamIdentifier"][0]
     app_id = f"{prefix}.{bundle_id}"
+    allowed = profile.get("Entitlements", {})
     ents = {
         "application-identifier": app_id,
         "com.apple.developer.team-identifier": team,
         "keychain-access-groups": [app_id],
-        "get-task-allow": True,
+        "get-task-allow": bool(allowed.get("get-task-allow", False)),
     }
+    if allowed.get("beta-reports-active"):
+        ents["beta-reports-active"] = True
     with open(out_path, "wb") as f:
         plistlib.dump(ents, f)
 

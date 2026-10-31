@@ -119,6 +119,52 @@ Lessons learned (Wails v3.0.0, Xcode 27, iOS 27):
   root *and* a USB connection. Install, launch and `devicectl device copy
   from --domain-type appDataContainer` all work over Wi-Fi.
 
+## App Store / TestFlight builds
+
+```bash
+wails3 task store:ios             # signed .ipa at bin/pontecesures-net-mobile.ipa
+wails3 task store:ios:upload      # validate + upload with an App Store Connect API key
+```
+
+Requirements (one-off, developer.apple.com):
+
+- An "Apple Distribution" certificate with its private key in the keychain.
+  The CSR can be made with `openssl req` instead of Keychain Access; combine
+  the downloaded `.cer` with the key into a `.p12` and `security import` it.
+- An explicit App ID `net.pontecesures.app` (team prefix `MA8KEHHSX2`; App
+  Store Connect does not accept wildcard App IDs). The description field
+  only allows letters, digits and spaces.
+- An **iOS** "App Store Connect" provisioning profile for that App ID and
+  certificate at `bin/store.mobileprovision` (gitignored). Note that a macOS
+  profile downloads as `.provisionprofile`; iOS ones are `.mobileprovision`.
+
+What the build adds compared with `device:ios`:
+
+- Distribution entitlements from the profile (`get-task-allow` false,
+  `beta-reports-active` for TestFlight) via `scripts/ios_signing.py`.
+- A fresh `CFBundleVersion` per build (`YYMMDD.HHMM`, override with
+  `BUILD_NUMBER=`); the marketing version is `CFBundleShortVersionString` in
+  `build/ios/Info.plist` (override with `APP_VERSION=`).
+- The `DT*` keys Xcode normally writes (SDK, platform and Xcode versions),
+  which App Store Connect validates; `ios:package` adds them to device builds.
+- `build/ios/PrivacyInfo.xcprivacy`: no tracking, no collected data, and the
+  required-reason APIs the Go runtime links (`stat` family → file timestamps
+  C617.1, `mach_absolute_time` → system boot time 35F9.1). Re-check with
+  `nm -u bin/pontecesures-net-mobile` after adding dependencies.
+
+`Info.plist` declares iPhone only (`UIDeviceFamily` 1) and
+`ITSAppUsesNonExemptEncryption` false (HTTPS only).
+
+The Wails runtime always links its optional mobile features (location,
+camera torch, image picker, motion, biometrics). If App Store Connect reports
+missing purpose strings (ITMS-90683) for them, add the keys listed in the
+commented block of `Info.plist` with an honest text, even though the app
+never requests those permissions.
+
+Uploading: `store:ios:upload` needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and
+`~/.appstoreconnect/private_keys/AuthKey_<ASC_KEY_ID>.p8`; alternatively drag
+the `.ipa` into Apple's Transporter app.
+
 ## Debugging
 
 - iOS: Safari → Develop → Simulator → the app. Logs: `wails3 task ios:logs:dev`.

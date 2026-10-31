@@ -31,6 +31,9 @@ vars:
   PROVISIONING_PROFILE: '{{.PROVISIONING_PROFILE | default ""}}'
   # Optional entitlements applied at codesign time (generated default below)
   ENTITLEMENTS_FILE: '{{.ENTITLEMENTS_FILE | default "build/ios/entitlements.plist"}}'
+  # Optional Info.plist overrides: CFBundleVersion / CFBundleShortVersionString
+  BUILD_NUMBER: '{{.BUILD_NUMBER | default ""}}'
+  APP_VERSION: '{{.APP_VERSION | default ""}}'
   # SDK_PATH is computed lazily at task-level to avoid errors on non-macOS systems
 
 tasks:
@@ -157,15 +160,51 @@ tasks:
             --product-type com.apple.product-type.application \
             --target-device iphone \
             --target-device ipad \
-            --output-partial-info-plist "$APP_BUNDLE/assetcatalog_generated_info.plist" \
+            --output-partial-info-plist "$TMP_AC/assetcatalog_generated_info.plist" \
             "$AC_IN"
           if [ -f "$TMP_AC/Assets.car" ]; then
             cp -f "$TMP_AC/Assets.car" "$APP_BUNDLE/Assets.car"
           fi
-          rm -rf "$TMP_AC"
-          if [ -f "$APP_BUNDLE/assetcatalog_generated_info.plist" ]; then
-            /usr/libexec/PlistBuddy -c "Merge $APP_BUNDLE/assetcatalog_generated_info.plist" "$APP_BUNDLE/Info.plist" || true
+          # Merge the icon keys (CFBundleIcons) into Info.plist. The partial
+          # plist is kept outside the bundle so it does not ship in the app.
+          if [ -f "$TMP_AC/assetcatalog_generated_info.plist" ]; then
+            /usr/libexec/PlistBuddy -c "Merge $TMP_AC/assetcatalog_generated_info.plist" "$APP_BUNDLE/Info.plist" || true
           fi
+          rm -rf "$TMP_AC"
+        fi
+      - |
+        # Privacy manifest (required by App Store review).
+        if [ -f build/ios/PrivacyInfo.xcprivacy ]; then
+          cp build/ios/PrivacyInfo.xcprivacy "{{.BIN_DIR}}/{{.APP_NAME}}.app/"
+        fi
+      - |
+        # Optional version overrides (task store:ios sets a fresh build number
+        # for every App Store Connect upload).
+        PLIST="{{.BIN_DIR}}/{{.APP_NAME}}.app/Info.plist"
+        if [ -n "{{.BUILD_NUMBER}}" ]; then plutil -replace CFBundleVersion -string "{{.BUILD_NUMBER}}" "$PLIST"; fi
+        if [ -n "{{.APP_VERSION}}" ]; then plutil -replace CFBundleShortVersionString -string "{{.APP_VERSION}}" "$PLIST"; fi
+      - |
+        # Device builds: add the build metadata Xcode writes into Info.plist.
+        # App Store Connect validates these keys (platform, SDK and Xcode
+        # versions) and rejects uploads without them.
+        if [ "{{.IOS_PLATFORM}}" = "device" ]; then
+          PLIST="{{.BIN_DIR}}/{{.APP_NAME}}.app/Info.plist"
+          SDK_VERSION=$(xcrun --sdk iphoneos --show-sdk-version)
+          SDK_BUILD=$(xcrun --sdk iphoneos --show-sdk-build-version)
+          XCODE_VERSION=$(xcodebuild -version | awk 'NR==1 {print $2}')
+          XCODE_BUILD=$(xcodebuild -version | awk 'NR==2 {print $3}')
+          # "27.2" -> "2720", "16.4.1" -> "1641" (Xcode's DTXcode format)
+          DT_XCODE=$(echo "$XCODE_VERSION" | awk -F. '{printf "%d%d%d", $1, $2, $3}')
+          plutil -replace CFBundleSupportedPlatforms -json '["iPhoneOS"]' "$PLIST"
+          plutil -replace DTPlatformName -string iphoneos "$PLIST"
+          plutil -replace DTPlatformVersion -string "$SDK_VERSION" "$PLIST"
+          plutil -replace DTPlatformBuild -string "$SDK_BUILD" "$PLIST"
+          plutil -replace DTSDKName -string "iphoneos$SDK_VERSION" "$PLIST"
+          plutil -replace DTSDKBuild -string "$SDK_BUILD" "$PLIST"
+          plutil -replace DTXcode -string "$DT_XCODE" "$PLIST"
+          plutil -replace DTXcodeBuild -string "$XCODE_BUILD" "$PLIST"
+          plutil -replace DTCompiler -string com.apple.compilers.llvm.clang.1_0 "$PLIST"
+          plutil -replace BuildMachineOSBuild -string "$(sw_vers -buildVersion)" "$PLIST"
         fi
       - |
         # Sign the bundle. Ad-hoc ("-") works on the simulator only; device
@@ -324,15 +363,17 @@ tasks:
             --product-type com.apple.product-type.application \
             --target-device iphone \
             --target-device ipad \
-            --output-partial-info-plist "$APP_BUNDLE/assetcatalog_generated_info.plist" \
+            --output-partial-info-plist "$TMP_AC/assetcatalog_generated_info.plist" \
             "$AC_IN"
           if [ -f "$TMP_AC/Assets.car" ]; then
             cp -f "$TMP_AC/Assets.car" "$APP_BUNDLE/Assets.car"
           fi
-          rm -rf "$TMP_AC"
-          if [ -f "$APP_BUNDLE/assetcatalog_generated_info.plist" ]; then
-            /usr/libexec/PlistBuddy -c "Merge $APP_BUNDLE/assetcatalog_generated_info.plist" "$APP_BUNDLE/Info.plist" || true
+          # Merge the icon keys (CFBundleIcons) into Info.plist. The partial
+          # plist is kept outside the bundle so it does not ship in the app.
+          if [ -f "$TMP_AC/assetcatalog_generated_info.plist" ]; then
+            /usr/libexec/PlistBuddy -c "Merge $TMP_AC/assetcatalog_generated_info.plist" "$APP_BUNDLE/Info.plist" || true
           fi
+          rm -rf "$TMP_AC"
         fi
       - codesign --force --sign - "{{.BIN_DIR}}/{{.APP_NAME}}.dev.app"
       - |

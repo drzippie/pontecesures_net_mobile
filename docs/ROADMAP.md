@@ -27,7 +27,8 @@
 - [ ] Deploy `pcn-mobile` so related posts match the website exactly
 
 ## Phase 2 — Store release
-- [ ] Signing (Xcode automatic signing; Android upload keystore)
+- [x] iOS distribution signing and App Store build (`wails3 task store:ios`)
+- [ ] Android upload keystore
 - [ ] TestFlight and Google Play internal testing
 - [ ] Privacy policy and store listings (Spanish)
 - [ ] CI builds (GitHub Actions)

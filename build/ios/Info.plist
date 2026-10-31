@@ -49,11 +49,18 @@
     
     
     <key>NSHumanReadableCopyright</key>
-    <string>© 2026, My Company</string>
-    
-    
-    <key>CFBundleGetInfoString</key>
-    <string>This is a comment</string>
+    <string>© 2026 Antonio Cortés (DrZippie)</string>
+    <!-- iPhone only (1). Supporting iPad (2) would also require iPad
+         screenshots and an iPad-ready layout for App Store review. -->
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>1</integer>
+    </array>
+    <!-- Only HTTPS through the system networking stack: exempt from export
+         compliance documentation, so App Store Connect does not ask on
+         every upload. -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     
     <!--
       Privacy usage descriptions. iOS hard-crashes (and the App Store rejects the
