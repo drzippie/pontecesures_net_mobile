@@ -266,3 +266,33 @@ func (r rawPost) full() Post {
 	s.Image = PostImage(r.Content.Rendered, s.Categories, 800)
 	return Post{PostSummary: s, Content: SanitizeHTML(r.Content.Rendered)}
 }
+
+// Page returns a published page by ID with sanitised content.
+func (c *Client) Page(ctx context.Context, id int) (Page, error) {
+	q := url.Values{"_fields": {"id,title,content,link,modified"}}
+	body, _, _, _, err := c.fetch(ctx, "/wp/v2/pages/"+strconv.Itoa(id), q)
+	if err != nil {
+		return Page{}, err
+	}
+	var r struct {
+		ID       int    `json:"id"`
+		Link     string `json:"link"`
+		Modified string `json:"modified"`
+		Title    struct {
+			Rendered string `json:"rendered"`
+		} `json:"title"`
+		Content struct {
+			Rendered string `json:"rendered"`
+		} `json:"content"`
+	}
+	if err := json.Unmarshal(body, &r); err != nil {
+		return Page{}, err
+	}
+	return Page{
+		ID:       r.ID,
+		Title:    PlainText(r.Title.Rendered),
+		Content:  SanitizeHTML(r.Content.Rendered),
+		Link:     r.Link,
+		Modified: r.Modified,
+	}, nil
+}

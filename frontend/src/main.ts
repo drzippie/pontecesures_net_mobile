@@ -7,7 +7,7 @@ import "./style.css";
 
 import { ContentService, SettingsService, WeatherService } from "../bindings/github.com/drzippie/pontecesures_net_mobile";
 import type { Forecast } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/meteo/models";
-import type { Category, Post, PostSummary } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/wp/models";
+import type { Category, Page, Post, PostSummary } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/wp/models";
 import { dictionaries, fmt, type Strings } from "./i18n";
 import { longDate, number, relativeDate } from "./lib/format";
 import { applyPrefs, loadLocal, normalize, saveLocal, type Prefs } from "./lib/prefs";
@@ -104,6 +104,8 @@ Alpine.data("app", () => ({
   searchTimer: undefined as number | undefined,
 
   article: { id: 0, data: null as Post | PostSummary | null, full: false, loading: false, error: "" as ErrorKind },
+  /** Static website page shown in #/pagina/:id. */
+  page: { id: 0, data: null as Page | null, loading: false, error: "" as ErrorKind },
   /** "Más sobre esto" under the open article. */
   related: { id: 0, items: [] as PostSummary[], loading: false },
   weather: { data: null as Forecast | null, loading: false, error: false, loadedAt: 0 },
@@ -254,6 +256,7 @@ Alpine.data("app", () => ({
     if (prev.name !== "article") this.$nextTick(() => window.scrollTo(0, list?.scrollY ?? 0));
     if (r.name === "search") this.$nextTick(() => (this.$refs.searchInput as HTMLInputElement)?.focus());
     if (r.name === "weather" || r.name === "home") this.loadWeather();
+    if (r.name === "page") this.loadPage(r.id);
   },
 
   get currentCategory(): number {
@@ -460,6 +463,19 @@ Alpine.data("app", () => ({
     this.lightbox = { open: false, src: "", alt: "", hint: false };
   },
 
+  // ---------- static pages ----------
+
+  async loadPage(id: number) {
+    if (this.page.id === id && (this.page.data || this.page.loading)) return;
+    this.page = { id, data: null, loading: true, error: "" };
+    try {
+      const data = await ContentService.Page(id);
+      if (this.page.id === id) this.page = { id, data, loading: false, error: "" };
+    } catch (err) {
+      if (this.page.id === id) Object.assign(this.page, { loading: false, error: errorKind(err) });
+    }
+  },
+
   // ---------- saved articles ----------
 
   async loadSavedIds() {
@@ -573,7 +589,7 @@ Alpine.data("app", () => ({
     // Sections and the weather view are reached from the front page; the
     // settings from "More".
     const b = this.base.name;
-    const n = b === "section" || b === "weather" ? "home" : b === "settings" || b === "saved" ? "more" : b;
+    const n = b === "section" || b === "weather" ? "home" : ["settings", "saved", "page"].includes(b) ? "more" : b;
     return n === name;
   },
 }));

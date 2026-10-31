@@ -4,6 +4,7 @@
 export type {
     Category,
     Image,
+    Page,
     Post,
     PostPage,
     PostSummary

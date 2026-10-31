@@ -330,6 +330,34 @@
       </div>
     </section>
 
+    <!-- ===== Static page (collaborate, rules, legal) ===== -->
+    <section x-show="base.name === 'page'" class="px-4 pt-3">
+      <button type="button" class="-ml-2 flex min-h-11 items-center gap-1 rounded-full px-2 text-verdemar font-semibold active:bg-line-soft" @click="back()">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        <span x-text="t.article.back"></span>
+      </button>
+      <template x-if="page.data">
+        <article class="pb-6">
+          <h1 class="mt-2 font-display text-[1.75rem] font-bold leading-tight" x-text="page.data.title"></h1>
+          <div class="post-body mt-5" x-html="page.data.content" @click="onContentClick($event)"></div>
+          <button type="button" class="mt-8 w-full rounded-xl border border-line py-3 font-semibold text-verdemar active:bg-line-soft"
+                  @click="openExternal(page.data.link)" x-text="t.article.openWeb"></button>
+        </article>
+      </template>
+      <template x-if="!page.data && page.loading">
+        <div class="flex items-center justify-center gap-2 py-16 text-muted">
+          <span class="size-4 rounded-full border-2 border-verdemar border-t-transparent animate-spin"></span>
+          <span x-text="t.article.loadingPage"></span>
+        </div>
+      </template>
+      <template x-if="!page.data && page.error">
+        <div class="py-10 text-center space-y-3">
+          <p x-text="t.error[page.error]"></p>
+          <button type="button" class="rounded-full bg-chrome text-white px-4 py-2 font-semibold" @click="page.id = 0; loadPage(route.id)" x-text="t.error.retry"></button>
+        </div>
+      </template>
+    </section>
+
     <!-- ===== More ===== -->
     <section x-show="base.name === 'more'" class="px-4 pt-4 space-y-6">
       <h1 class="font-display text-2xl font-bold" x-text="t.more.title"></h1>
@@ -348,12 +376,13 @@
       <div>
         <h2 class="text-xs font-semibold uppercase tracking-wider text-muted mb-2" x-text="t.more.links"></h2>
         <ul class="rounded-xl bg-surface border border-line-soft divide-y divide-line-soft overflow-hidden">
+          <!-- Website pages open inside the app (ids of WordPress pages);
+               only "Abrir pontecesures.net" goes to the browser. -->
           <template x-for="l in [
+              { label: t.more.collaborate, hash: '#/pagina/10' },
+              { label: t.more.rules, hash: '#/pagina/287' },
+              { label: t.more.legal, hash: '#/pagina/487' },
               { label: t.more.website, path: '/' },
-              { label: t.more.weather, hash: '#/tiempo' },
-              { label: t.more.collaborate, path: '/colaborar/' },
-              { label: t.more.rules, path: '/colaborar/normas-de-uso/' },
-              { label: t.more.legal, path: '/colaborar/legal/' },
             ]" :key="l.label">
             <li>
               <button type="button" class="flex w-full items-center justify-between px-4 py-3.5 text-left active:bg-line-soft" @click="l.hash ? (location.hash = l.hash) : openSite(l.path)">

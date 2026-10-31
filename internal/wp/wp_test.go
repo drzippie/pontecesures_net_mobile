@@ -190,3 +190,18 @@ func TestSearchOrderAndCategory(t *testing.T) {
 		t.Fatalf("orderby without search: %v", got)
 	}
 }
+
+func TestPageIsSanitised(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/wp-json/wp/v2/pages/287" {
+			t.Errorf("path = %s", r.URL.Path)
+		}
+		_, _ = w.Write([]byte(`{"id":287,"link":"https://pontecesures.net/colaborar/normas-de-uso/","modified":"2026-03-11T10:00:00",
+"title":{"rendered":"Normas de Uso"},"content":{"rendered":"<p onclick=\"x()\">Benvido/a</p><script>alert(1)</script>"}}`))
+	}))
+	defer srv.Close()
+	p, err := NewClient(Options{BaseURL: srv.URL}).Page(context.Background(), 287)
+	if err != nil || p.Title != "Normas de Uso" || strings.Contains(p.Content, "script") || strings.Contains(p.Content, "onclick") {
+		t.Fatalf("Page = %+v, %v", p, err)
+	}
+}

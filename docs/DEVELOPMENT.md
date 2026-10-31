@@ -210,7 +210,11 @@ will live here once accounts exist — and display preferences:
 ## Frontend
 
 - Hash router (`src/lib/router.ts`): `#/`, `#/seccion/:id`, `#/secciones`,
-  `#/buscar`, `#/mas`, `#/tiempo`, `#/ajustes`, `#/noticia/:id`. The article is an overlay so the list
+  `#/buscar`, `#/mas`, `#/tiempo`, `#/ajustes`, `#/guardadas`,
+  `#/pagina/:id`, `#/noticia/:id`.
+- Website pages shown in-app (`#/pagina/:id`, `ContentService.Page`, same
+  sanitising and offline cache as posts): "Como colaborar" (10), "Normas de
+  uso" (287) and "Legal" (487), referenced by WordPress page ID. The article is an overlay so the list
   keeps its scroll position.
 - One root Alpine component (`app` in `src/main.ts`).
 - Design tokens (colors, Fraunces + Source Sans 3) copied from the website

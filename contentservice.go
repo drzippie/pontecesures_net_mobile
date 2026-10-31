@@ -103,6 +103,13 @@ func (s *ContentService) Post(id int) (wp.Post, error) {
 	return p, nil
 }
 
+// Page returns a static page of the website (collaborate, rules, legal…).
+func (s *ContentService) Page(id int) (wp.Page, error) {
+	ctx, cancel := reqCtx()
+	defer cancel()
+	return s.client.Page(ctx, id)
+}
+
 // SaveArticle stores an article on the device for offline reading.
 func (s *ContentService) SaveArticle(id int) error {
 	ctx, cancel := reqCtx()

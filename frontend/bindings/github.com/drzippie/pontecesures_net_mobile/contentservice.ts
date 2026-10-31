@@ -35,6 +35,13 @@ export function OpenURL(link: string): $CancellablePromise<void> {
 }
 
 /**
+ * Page returns a static page of the website (collaborate, rules, legal…).
+ */
+export function Page(id: number): $CancellablePromise<wp$0.Page> {
+    return $Call.ByID(1341912331, id);
+}
+
+/**
  * Post returns a full article. Saved articles are always readable offline,
  * and their stored copy is refreshed whenever the network copy loads.
  */

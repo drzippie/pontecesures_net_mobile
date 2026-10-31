@@ -86,3 +86,12 @@ type rawPost struct {
 		} `json:"wp:term"`
 	} `json:"_embedded"`
 }
+
+// Page is a static WordPress page (e.g. "Como colaborar", "Normas de uso").
+type Page struct {
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"` // sanitised HTML
+	Link     string `json:"link"`
+	Modified string `json:"modified"`
+}

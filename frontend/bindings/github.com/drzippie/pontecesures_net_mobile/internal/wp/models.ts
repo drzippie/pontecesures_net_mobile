@@ -41,6 +41,21 @@ export interface Image {
 }
 
 /**
+ * Page is a static WordPress page (e.g. "Como colaborar", "Normas de uso").
+ */
+export interface Page {
+    "id": number;
+    "title": string;
+
+    /**
+     * sanitised HTML
+     */
+    "content": string;
+    "link": string;
+    "modified": string;
+}
+
+/**
  * Post is a full article ready to be rendered.
  */
 export interface Post {
