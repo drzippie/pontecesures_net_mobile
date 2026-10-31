@@ -12,6 +12,7 @@ import { longDate, number, relativeDate } from "./lib/format";
 import { applyPrefs, loadLocal, normalize, saveLocal, type Prefs } from "./lib/prefs";
 import { href, isInternalPostLink, parseHash, type Route } from "./lib/router";
 import { dayDate, dayLabel, hourMinute, rainMax, skyIcon, skyText, windText } from "./lib/weather";
+import { attachZoom, largestSource } from "./lib/zoom";
 
 /** Re-fetch the forecast when the copy shown is older than this. */
 const WEATHER_TTL_MS = 30 * 60 * 1000;
@@ -82,8 +83,12 @@ Alpine.data("app", () => ({
   route: { name: "home" } as Route,
   /** Last non-article route, shown underneath the article overlay. */
   base: { name: "home" } as Route,
-  /** Number of in-app navigations, to know whether "back" can pop history. */
-  depth: 0,
+  /**
+   * Hashes visited in this session, newest last. Lets "Volver" know whether
+   * there is an in-app page to go back to, also after the system back
+   * gesture (Android back button, iOS edge swipe) moved through history.
+   */
+  navStack: [] as string[],
 
   categories: [] as Category[],
   feeds: {} as Record<number, ListState>,
@@ -94,13 +99,18 @@ Alpine.data("app", () => ({
   /** "Más sobre esto" under the open article. */
   related: { id: 0, items: [] as PostSummary[], loading: false },
   weather: { data: null as Forecast | null, loading: false, error: false, loadedAt: 0 },
+  /** Full-screen image viewer. */
+  lightbox: { open: false, src: "", alt: "", hint: false },
+  detachZoom: null as null | (() => void),
 
   toast: "",
   toastTimer: undefined as number | undefined,
 
   init() {
-    window.addEventListener("hashchange", () => this.onRoute(true));
-    this.onRoute(false);
+    window.addEventListener("hashchange", () => this.onRoute());
+    this.onRoute();
+    // Called by the Android host (MainActivity.onBackPressed).
+    window.pcnHandleBack = () => this.handleSystemBack();
     this.loadCategories();
     this.loadWeather();
     this.syncSettings();
@@ -142,14 +152,36 @@ Alpine.data("app", () => ({
   },
 
   back() {
-    if (this.depth > 0) history.back();
+    if (this.navStack.length > 1) history.back();
     else this.go(this.base.name === "article" ? { name: "home" } : this.base);
   },
 
-  onRoute(fromNav: boolean) {
+  /**
+   * System back (Android back button). Returns true when handled in-app;
+   * false on the front page so the OS can leave the app.
+   */
+  handleSystemBack(): boolean {
+    if (this.lightbox.open) {
+      this.closeLightbox();
+      return true;
+    }
+    if (this.route.name === "home" && this.navStack.length <= 1) return false;
+    this.back();
+    return true;
+  },
+
+  /** Keeps navStack in sync: a hash equal to the previous entry is a "back". */
+  trackNavigation() {
+    const h = location.hash || "#/";
+    const st = this.navStack;
+    if (st.length > 1 && st[st.length - 2] === h) st.pop();
+    else if (st[st.length - 1] !== h) st.push(h);
+  },
+
+  onRoute() {
     const prev = this.route;
     const r = parseHash(location.hash);
-    if (fromNav) this.depth++;
+    this.trackNavigation();
 
     // Remember the scroll position of the list we are leaving.
     if (prev.name !== "article" && r.name !== "article") {
@@ -340,10 +372,45 @@ Alpine.data("app", () => ({
     }
   },
 
-  /** Intercepts taps on links inside an article body. */
+  // ---------- image viewer ----------
+
+  openLightbox(img: HTMLImageElement) {
+    this.lightbox = { open: true, src: largestSource(img), alt: img.alt, hint: true };
+    // The usage hint is only needed for a moment; it would cover the image.
+    window.setTimeout(() => (this.lightbox.hint = false), 2500);
+    this.$nextTick(() => {
+      const box = this.$refs.lightbox as HTMLElement;
+      const big = this.$refs.lightboxImg as HTMLImageElement;
+      this.detachZoom?.();
+      this.detachZoom = attachZoom(box, big);
+    });
+  },
+
+  closeLightbox() {
+    this.detachZoom?.();
+    this.detachZoom = null;
+    this.lightbox = { open: false, src: "", alt: "", hint: false };
+  },
+
+  /** Intercepts taps inside an article body: images open the viewer, links navigate. */
   async onContentClick(ev: MouseEvent) {
-    const a = (ev.target as HTMLElement).closest("a");
+    const target = ev.target as HTMLElement;
+    const img = target.closest("img");
+    // Images open full screen, unless they are the content of a link.
+    if (img && !target.closest("a")) {
+      ev.preventDefault();
+      this.openLightbox(img);
+      return;
+    }
+    const a = target.closest("a");
     if (!a) return;
+    // A linked image that points to an image file is also shown in the viewer.
+    const inner = a.querySelector("img");
+    if (inner && /\.(jpe?g|png|webp|gif)(\?|$)/i.test(a.getAttribute("href") ?? "")) {
+      ev.preventDefault();
+      this.openLightbox(inner);
+      return;
+    }
     const link = a.getAttribute("href") ?? "";
     ev.preventDefault();
     if (!link || link.startsWith("#")) return;
@@ -417,5 +484,6 @@ Alpine.start();
 declare global {
   interface Window {
     Alpine: typeof Alpine;
+    pcnHandleBack?: () => boolean;
   }
 }

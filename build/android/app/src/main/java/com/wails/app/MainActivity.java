@@ -924,12 +924,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * The app navigates with URL fragments (#/noticia/123), which
+     * WebView.canGoBack() does not count, so the system back button used to
+     * close the app from any screen. Ask the page first: it returns true when
+     * it handled the back navigation itself (window.pcnHandleBack in
+     * frontend/src/main.ts) and false on the front page, where back leaves
+     * the app as usual.
+     */
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-        } else {
+        if (webView == null) {
             super.onBackPressed();
+            return;
         }
+        webView.evaluateJavascript(
+            "(function(){try{return !!(window.pcnHandleBack&&window.pcnHandleBack());}catch(e){return false;}})()",
+            handled -> {
+                if (!"true".equals(handled)) {
+                    if (webView.canGoBack()) {
+                        webView.goBack();
+                    } else {
+                        MainActivity.super.onBackPressed();
+                    }
+                }
+            });
     }
 }

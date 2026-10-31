@@ -49,10 +49,13 @@ func main() {
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
 		IOS: application.IOSOptions{
-			BackgroundColour:            chromeColour,
-			DisableLinkPreview:          true,
-			EnableInlineMediaPlayback:   true,
-			ApplicationNameForUserAgent: "PontecesuresNetMobile/" + appVersion,
+			BackgroundColour:   chromeColour,
+			DisableLinkPreview: true,
+			// Swipe from the left edge goes back (closes the article, returns
+			// to the previous section): every view is a history entry.
+			EnableBackForwardNavigationGestures: true,
+			EnableInlineMediaPlayback:           true,
+			ApplicationNameForUserAgent:         "PontecesuresNetMobile/" + appVersion,
 		},
 		Android: application.AndroidOptions{
 			DisableOverscroll: true,

@@ -150,7 +150,7 @@ html[data-text-size="xlarge"] {
     @apply break-words;
   }
   & img {
-    @apply rounded-lg mx-auto h-auto;
+    @apply rounded-lg mx-auto h-auto cursor-zoom-in;
   }
   /* Same rule as the website: landscape photos fill the width; posters and
      obituaries are shown whole. */

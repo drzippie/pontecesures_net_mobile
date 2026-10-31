@@ -45,6 +45,8 @@ export const es = {
     by: "Por {author}",
     loading: "Cargando noticia…",
     related: "Más sobre esto",
+    closeImage: "Cerrar imagen",
+    imageHint: "Pellizca o toca dos veces para ampliar",
   },
 
   more: {

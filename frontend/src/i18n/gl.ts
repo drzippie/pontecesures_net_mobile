@@ -46,6 +46,8 @@ export const gl: Strings = {
     by: "Por {author}",
     loading: "Cargando a nova…",
     related: "Máis sobre isto",
+    closeImage: "Pechar a imaxe",
+    imageHint: "Belisca ou toca dúas veces para ampliar",
   },
 
   more: {
