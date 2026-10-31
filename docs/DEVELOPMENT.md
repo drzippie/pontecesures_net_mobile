@@ -13,6 +13,55 @@
 
 Run `wails3 doctor` to check everything.
 
+Reference setup on macOS (Apple Silicon):
+
+```bash
+# JDK 21 (Temurin tarball, no sudo needed)
+export JAVA_HOME="$HOME/Library/Java/JavaVirtualMachines/jdk-21.0.13+9/Contents/Home"
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin"
+
+# SDK packages (sdkmanager from `brew install --cask android-commandlinetools`)
+sdkmanager --sdk_root="$ANDROID_HOME" "cmdline-tools;latest" "platform-tools" \
+  "platforms;android-35" "build-tools;35.0.0" "ndk;26.3.11579264" "emulator" \
+  "system-images;android-35;google_apis;arm64-v8a"
+avdmanager create avd --name wails --package "system-images;android-35;google_apis;arm64-v8a" --device pixel_7
+```
+
+## Platform quirks (Wails v3.0.0)
+
+- **iOS executable name.** `CFBundleExecutable` in `build/ios/Info*.plist`
+  must match the Taskfile binary name (`pontecesures-net-mobile`, with
+  hyphens). `wails3 init` wrote it with underscores and the simulator refused
+  to install the bundle.
+- **iOS system bars.** The WebView is laid out *inside* the safe area, so the
+  native window colour shows behind the status bar and home indicator. The
+  window uses the fixed chrome colour (`chromeColour` in `main.go`,
+  `--color-chrome` in CSS) and the status bar is set to light content.
+- **Android insets.** Android 15 draws edge-to-edge, but the WebView only
+  reports the top inset through `env(safe-area-inset-*)`. `main.ts` reads
+  `ContentService.SafeArea()` (physical px ÷ `devicePixelRatio`) into
+  `--safe-top`/`--safe-bottom`; the `pt-safe`/`pb-safe` utilities take the
+  max of both.
+- **Platform detection.** `System.IsAndroid()` from `@wailsio/runtime` returns
+  `false` in the Android WebView (`window._wails.environment` is not set); use
+  the user agent or ask Go (`application.System.IsMobile()`).
+- **Phantom adb device.** If `adb devices` lists an `emulator-55xx` as
+  `offline` while no emulator is running (another process listening on that
+  port, e.g. a container), `android:run` skips booting the emulator and fails
+  with `device offline`. Start the emulator yourself on a free port
+  (`emulator -avd wails -port 5580`) and export `ANDROID_SERIAL=emulator-5580`.
+
+## Debugging
+
+- iOS: Safari → Develop → Simulator → the app. Logs: `wails3 task ios:logs:dev`.
+- Android: `chrome://inspect`, or script it through the DevTools socket:
+  `adb forward tcp:9333 localabstract:webview_devtools_remote_<pid>` and
+  `curl localhost:9333/json`. Logs: `wails3 task android:logs`.
+- Screenshots: `xcrun simctl io booted screenshot x.png`,
+  `adb exec-out screencap -p > x.png`.
+
 ## Architecture
 
 ```

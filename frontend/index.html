@@ -35,7 +35,7 @@
     </nav>
   </header>
 
-  <main class="pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
+  <main class="pb-[calc(4.5rem+var(--sa-bottom))]">
 
     <!-- ===== Search box ===== -->
     <div x-show="base.name === 'search'" class="px-4 pt-4">
@@ -174,7 +174,7 @@
     </div>
 
     <template x-if="article.data">
-      <article class="pb-[calc(2rem+env(safe-area-inset-bottom))]">
+      <article class="pb-[calc(2rem+var(--sa-bottom))]">
         <!-- Photos already appear in the body; only the section illustration is used as a header. -->
         <template x-if="article.data.image && (article.data.image.fallback || !article.full)">
           <div class="bg-line-soft" :class="article.data.image.landscape ? 'aspect-[16/9]' : 'flex justify-center'">
@@ -242,7 +242,7 @@
 
   <!-- ===== Toast ===== -->
   <div x-show="toast" x-transition.opacity role="status" aria-live="polite"
-       class="fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-50 flex justify-center pointer-events-none">
+       class="fixed inset-x-0 bottom-[calc(5rem+var(--sa-bottom))] z-50 flex justify-center pointer-events-none">
     <span class="rounded-full bg-ink text-ground px-4 py-2 text-sm shadow-lg" x-text="toast"></span>
   </div>
 </body>

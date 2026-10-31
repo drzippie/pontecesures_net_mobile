@@ -36,6 +36,28 @@ function errorText(err: unknown): string {
   return es.error.generic;
 }
 
+/**
+ * Android draws the WebView edge-to-edge but does not report the system bar
+ * insets through CSS env(); read them from Go (physical px) and expose them
+ * as CSS variables used by the pt-safe/pb-safe utilities.
+ */
+async function applyAndroidSafeArea() {
+  // System.IsAndroid() is not reliable here: window._wails.environment is
+  // not populated in the Android WebView (Wails v3.0.0).
+  if (!/\bAndroid\b/.test(navigator.userAgent)) return;
+  try {
+    const sa = await ContentService.SafeArea();
+    const dpr = window.devicePixelRatio || 1;
+    const root = document.documentElement.style;
+    root.setProperty("--safe-top", `${sa.top / dpr}px`);
+    root.setProperty("--safe-bottom", `${sa.bottom / dpr}px`);
+  } catch {
+    /* keep env() values */
+  }
+}
+applyAndroidSafeArea();
+window.addEventListener("resize", () => applyAndroidSafeArea());
+
 Alpine.plugin(intersect);
 
 Alpine.data("app", () => ({

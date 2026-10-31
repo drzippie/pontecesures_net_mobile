@@ -16,6 +16,10 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 // @ts-ignore: Unused imports
 import * as wp$0 from "./internal/wp/models.js";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as $models from "./models.js";
+
 /**
  * Categories returns the sections with content, most used first.
  */
@@ -51,6 +55,16 @@ export function PostByURL(link: string): $CancellablePromise<wp$0.Post> {
  */
 export function Posts(page: number, categoryID: number, search: string): $CancellablePromise<wp$0.PostPage> {
     return $Call.ByID(1593940411, page, categoryID, search);
+}
+
+/**
+ * SafeArea returns the raw system bar insets (physical pixels on Android,
+ * points on iOS; zero on desktop). Android's WebView does not expose them
+ * through CSS env(safe-area-inset-*) when drawing edge-to-edge, so the
+ * frontend converts them to CSS variables.
+ */
+export function SafeArea(): $CancellablePromise<$models.Insets> {
+    return $Call.ByID(277054316);
 }
 
 /**

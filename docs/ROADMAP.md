@@ -8,7 +8,7 @@
 - [x] Front page, sections, search, article view
 - [x] Image cascade and orientation rules from the website theme
 - [x] Offline cache, internal link handling, share
-- [ ] Verify on iOS Simulator and Android Emulator
+- [x] Verify on iOS Simulator (iOS 18.3) and Android Emulator (API 35)
 - [ ] App icon and launch screen
 - [ ] Pull-to-refresh gesture
 - [ ] Fetch the illustration mapping from `pcn/v1/illustrations` once deployed

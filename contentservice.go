@@ -136,3 +136,21 @@ func (s *ContentService) Share(title, link string) bool {
 	application.Get().Clipboard.SetText(link)
 	return false
 }
+
+// Insets are the system bar insets reported by the native host.
+type Insets struct {
+	Top    float64 `json:"top"`
+	Bottom float64 `json:"bottom"`
+	Left   float64 `json:"left"`
+	Right  float64 `json:"right"`
+}
+
+// SafeArea returns the raw system bar insets (physical pixels on Android,
+// points on iOS; zero on desktop). Android's WebView does not expose them
+// through CSS env(safe-area-inset-*) when drawing edge-to-edge, so the
+// frontend converts them to CSS variables.
+func (s *ContentService) SafeArea() Insets {
+	var in Insets
+	_ = json.Unmarshal([]byte(application.Mobile.SafeAreaJSON()), &in)
+	return in
+}

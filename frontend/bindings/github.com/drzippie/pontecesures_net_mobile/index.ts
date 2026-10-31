@@ -5,3 +5,7 @@ import * as ContentService from "./contentservice.js";
 export {
     ContentService
 };
+
+export type {
+    Insets
+} from "./models.js";
