@@ -142,15 +142,37 @@ uses — `https://servizos.meteogalicia.gal/mgrss/predicion/jsonPredConcellos.ac
   table that does not match the official annex (e.g. it shows night code 201,
   "clear", as "Choiva escasa"). The app follows the official annex.
 
+## Settings and languages
+
+`#/ajustes` (from "Más") holds the account placeholder — profile management
+will live here once accounts exist — and display preferences:
+
+| Setting | Values | Effect |
+| --- | --- | --- |
+| Language | `es`, `gl` | UI strings (`src/i18n/{es,gl}.ts`), dates/numbers via `Intl` with `es-ES`/`gl-ES`. Default: Galician if the device prefers it, else Spanish |
+| Appearance | `auto`, `light`, `dark` | `<html data-theme>`; `auto` follows `prefers-color-scheme` |
+| Text size | `normal`, `large`, `xlarge` | `<html data-text-size>` scales the root font size (100/112.5/125 %) |
+
+- Go (`SettingsService`, `internal/settings`) is the source of truth: a
+  validated `settings.json` in the app's private storage (desktop: user
+  config dir), not in a cache directory.
+- A copy is kept in `localStorage` only to apply the preferences
+  synchronously before the first paint (no theme/language flash).
+- Weather code texts are part of the dictionaries; the Galician ones are the
+  official MeteoGalicia terms.
+- `wails3 task android:run` uninstalls the app first, so saved settings are
+  reset on every dev deploy.
+
 ## Frontend
 
 - Hash router (`src/lib/router.ts`): `#/`, `#/seccion/:id`, `#/secciones`,
-  `#/buscar`, `#/mas`, `#/tiempo`, `#/noticia/:id`. The article is an overlay so the list
+  `#/buscar`, `#/mas`, `#/tiempo`, `#/ajustes`, `#/noticia/:id`. The article is an overlay so the list
   keeps its scroll position.
 - One root Alpine component (`app` in `src/main.ts`).
 - Design tokens (colors, Fraunces + Source Sans 3) copied from the website
   theme into `src/style.css`; fonts are bundled for offline use.
-- UI strings live in `src/i18n/es.ts` — never hard-code text in the HTML.
+- UI strings live in `src/i18n/es.ts` and `gl.ts` — never hard-code text in
+  the HTML.
 
 ## Bindings
 

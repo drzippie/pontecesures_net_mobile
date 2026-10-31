@@ -3,13 +3,21 @@
 
 /*
  * Design tokens copied from the pontecesures.net theme
- * (wp-content/themes/pontecesures/assets/css). Light values first, dark
- * values under prefers-color-scheme.
+ * (wp-content/themes/pontecesures/assets/css).
+ *
+ * Theme selection (Settings → Apariencia) sets <html data-theme>:
+ *   auto  → follows prefers-color-scheme
+ *   light → always light
+ *   dark  → always dark
+ * The dark palette is declared twice (media query + explicit choice) because
+ * CSS cannot share one block between both selectors.
  */
 :root {
+  color-scheme: light;
   --estuario: #1b3a4b;
   --ground: #f7f6f3;
   --surface: #ffffff;
+  --raised: #ffffff;
   --ink: #14212b;
   --muted: #5e6b75;
   --line: #dddcd6;
@@ -20,10 +28,12 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --estuario: #0e1c24;
     --ground: #0f1a20;
     --surface: #16242c;
+    --raised: #2b414d;
     --ink: #e8edef;
     --muted: #9ba9b2;
     --line: #26353e;
@@ -34,6 +44,32 @@
   }
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --estuario: #0e1c24;
+  --ground: #0f1a20;
+  --surface: #16242c;
+  --raised: #2b414d;
+  --ink: #e8edef;
+  --muted: #9ba9b2;
+  --line: #26353e;
+  --line-soft: #1d2c34;
+  --tella: #e08a64;
+  --verdemar: #6fb6c4;
+  --granate: #c08fa0;
+}
+
+/*
+ * Text size (Settings → Tamaño del texto). Everything is sized in rem, so
+ * scaling the root font size scales the whole UI and the article body.
+ */
+html[data-text-size="large"] {
+  font-size: 112.5%;
+}
+html[data-text-size="xlarge"] {
+  font-size: 125%;
+}
+
 @theme inline {
   /* App chrome (masthead, tab bar). Fixed in both themes because it must
      match the native background painted behind the iOS/Android system bars
@@ -42,6 +78,8 @@
   --color-estuario: var(--estuario);
   --color-ground: var(--ground);
   --color-surface: var(--surface);
+  /* Selected item of a segmented control: stands out in both themes. */
+  --color-raised: var(--raised);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);

@@ -4,11 +4,12 @@ import "@fontsource-variable/fraunces";
 import "@fontsource-variable/source-sans-3";
 import "./style.css";
 
-import { ContentService, WeatherService } from "../bindings/github.com/drzippie/pontecesures_net_mobile";
+import { ContentService, SettingsService, WeatherService } from "../bindings/github.com/drzippie/pontecesures_net_mobile";
 import type { Forecast } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/meteo/models";
 import type { Category, Post, PostSummary } from "../bindings/github.com/drzippie/pontecesures_net_mobile/internal/wp/models";
-import { es, fmt } from "./i18n/es";
+import { dictionaries, fmt, type Strings } from "./i18n";
 import { longDate, number, relativeDate } from "./lib/format";
+import { applyPrefs, loadLocal, normalize, saveLocal, type Prefs } from "./lib/prefs";
 import { href, isInternalPostLink, parseHash, type Route } from "./lib/router";
 import { dayDate, dayLabel, hourMinute, rainMax, skyIcon, skyText, windText } from "./lib/weather";
 
@@ -25,7 +26,7 @@ interface ListState {
   totalPages: number;
   total: number;
   loading: boolean;
-  error: string;
+  error: ErrorKind;
   stale: boolean;
   scrollY: number;
 }
@@ -34,12 +35,19 @@ function emptyList(): ListState {
   return { items: [], page: 0, totalPages: 1, total: 0, loading: false, error: "", stale: false, scrollY: 0 };
 }
 
-function errorText(err: unknown): string {
+/** Error kind, rendered with t.error[kind] so it follows the language. */
+type ErrorKind = "" | "generic" | "network" | "notFound";
+
+function errorKind(err: unknown): ErrorKind {
   const msg = String((err as any)?.message ?? err ?? "");
-  if (/not found/i.test(msg)) return es.error.notFound;
-  if (/dial|timeout|no such host|network|connection|deadline/i.test(msg)) return es.error.network;
-  return es.error.generic;
+  if (/not found/i.test(msg)) return "notFound";
+  if (/dial|timeout|no such host|network|connection|deadline/i.test(msg)) return "network";
+  return "generic";
 }
+
+// Apply saved preferences before Alpine renders anything.
+const initialPrefs = normalize(loadLocal());
+applyPrefs(initialPrefs);
 
 /**
  * Android draws the WebView edge-to-edge but does not report the system bar
@@ -66,9 +74,9 @@ window.addEventListener("resize", () => applyAndroidSafeArea());
 Alpine.plugin(intersect);
 
 Alpine.data("app", () => ({
-  t: es,
+  prefs: initialPrefs as Prefs,
+  t: dictionaries[initialPrefs.language] as Strings,
   fmt,
-  number,
   version: APP_VERSION,
 
   route: { name: "home" } as Route,
@@ -82,7 +90,7 @@ Alpine.data("app", () => ({
   search: { ...emptyList(), q: "", ran: "" },
   searchTimer: undefined as number | undefined,
 
-  article: { id: 0, data: null as Post | PostSummary | null, full: false, loading: false, error: "" },
+  article: { id: 0, data: null as Post | PostSummary | null, full: false, loading: false, error: "" as ErrorKind },
   /** "Más sobre esto" under the open article. */
   related: { id: 0, items: [] as PostSummary[], loading: false },
   weather: { data: null as Forecast | null, loading: false, error: false, loadedAt: 0 },
@@ -95,6 +103,36 @@ Alpine.data("app", () => ({
     this.onRoute(false);
     this.loadCategories();
     this.loadWeather();
+    this.syncSettings();
+  },
+
+  // ---------- settings ----------
+
+  /** Go is the source of truth; adopt its values or seed it from local ones. */
+  async syncSettings() {
+    try {
+      const saved = await SettingsService.Get();
+      if (saved.language || saved.theme || saved.textSize) {
+        this.setPrefs(normalize(saved), false);
+      } else if (loadLocal()) {
+        await SettingsService.Save(this.prefs);
+      }
+    } catch {
+      /* keep local preferences */
+    }
+  },
+
+  setPrefs(p: Prefs, persist = true) {
+    this.prefs = p;
+    this.t = dictionaries[p.language];
+    applyPrefs(p);
+    saveLocal(p);
+    if (persist) SettingsService.Save(p).catch(() => this.showToast(this.t.settings.saveError));
+  },
+
+  setPref<K extends keyof Prefs>(key: K, value: Prefs[K]) {
+    if (this.prefs[key] === value) return;
+    this.setPrefs({ ...this.prefs, [key]: value });
   },
 
   // ---------- navigation ----------
@@ -191,7 +229,7 @@ Alpine.data("app", () => ({
       list.stale = res.stale;
       if (isSearch) this.search.ran = q;
     } catch (err) {
-      list.error = errorText(err);
+      list.error = errorKind(err);
     } finally {
       list.loading = false;
     }
@@ -247,14 +285,22 @@ Alpine.data("app", () => ({
     return this.weather.data?.days?.[0] ?? null;
   },
 
-  skyText,
   skyIcon,
-  windText,
   rainMax,
-  dayDate,
-  hourMinute,
+  skyText(code: number | null | undefined): string {
+    return skyText(code, this.t);
+  },
+  windText(code: number | null | undefined): string {
+    return windText(code, this.t);
+  },
   dayLabel(date: string): string {
-    return dayLabel(date, es.weather.today);
+    return dayLabel(date, this.t);
+  },
+  dayDate(date: string): string {
+    return dayDate(date, this.t.locale);
+  },
+  hourMinute(iso: string): string {
+    return hourMinute(iso, this.t.locale);
   },
 
   // ---------- article ----------
@@ -278,7 +324,7 @@ Alpine.data("app", () => ({
       const post = await ContentService.Post(id);
       if (this.article.id === id) this.article = { id, data: post, full: true, loading: false, error: "" };
     } catch (err) {
-      if (this.article.id === id) Object.assign(this.article, { loading: false, error: errorText(err) });
+      if (this.article.id === id) Object.assign(this.article, { loading: false, error: errorKind(err) });
     }
   },
 
@@ -303,7 +349,7 @@ Alpine.data("app", () => ({
     if (!link || link.startsWith("#")) return;
     const abs = new URL(link, SITE).toString();
     if (isInternalPostLink(abs)) {
-      this.article = { id: -1, data: null, full: false, loading: true, error: "" };
+      this.article = { id: -1, data: null, full: false, loading: true, error: "" as ErrorKind };
       try {
         const post = await ContentService.PostByURL(abs);
         this.article = { id: post.id, data: post, full: true, loading: false, error: "" };
@@ -320,11 +366,11 @@ Alpine.data("app", () => ({
     const p = this.article.data;
     if (!p) return;
     const native = await ContentService.Share(p.title, p.link).catch(() => false);
-    if (!native) this.showToast(es.article.linkCopied);
+    if (!native) this.showToast(this.t.article.linkCopied);
   },
 
   openExternal(link: string) {
-    ContentService.OpenURL(link).catch(() => this.showToast(es.error.generic));
+    ContentService.OpenURL(link).catch(() => this.showToast(this.t.error.generic));
   },
 
   openSite(path = "/") {
@@ -340,10 +386,16 @@ Alpine.data("app", () => ({
   // ---------- view helpers ----------
 
   when(p: PostSummary): string {
-    return relativeDate(p.date, es.time.now);
+    return relativeDate(p.date, this.t.locale, this.t.time.now);
   },
 
-  longDate,
+  longDate(iso: string): string {
+    return longDate(iso, this.t.locale);
+  },
+
+  number(n: number): string {
+    return number(n, this.t.locale);
+  },
 
   mainCategory(p: PostSummary): string {
     const cats = (p.categories ?? []).filter((c) => c.slug !== "sincategoria");
@@ -351,8 +403,10 @@ Alpine.data("app", () => ({
   },
 
   isTab(name: string): boolean {
-    // Sections and the weather view are reached from the front page.
-    const n = this.base.name === "section" || this.base.name === "weather" ? "home" : this.base.name;
+    // Sections and the weather view are reached from the front page; the
+    // settings from "More".
+    const b = this.base.name;
+    const n = b === "section" || b === "weather" ? "home" : b === "settings" ? "more" : b;
     return n === name;
   },
 }));

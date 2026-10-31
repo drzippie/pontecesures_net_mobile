@@ -39,6 +39,7 @@ func main() {
 		Services: []application.Service{
 			application.NewService(&ContentService{}),
 			application.NewService(&WeatherService{icons: icons}),
+			application.NewService(&SettingsService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler:    application.AssetFileServerFS(assets),

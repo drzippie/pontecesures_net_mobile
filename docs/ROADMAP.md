@@ -10,6 +10,7 @@
 - [x] Offline cache, internal link handling, share
 - [x] Related posts under each article ("Más sobre esto")
 - [x] Weather for Pontecesures (MeteoGalicia): front-page line + forecast view
+- [x] Settings: language (Spanish/Galician), appearance, text size
 - [x] Verify on iOS Simulator (iOS 18.3) and Android Emulator (API 35)
 - [ ] App icon and launch screen
 - [ ] Pull-to-refresh gesture
@@ -24,7 +25,7 @@
 
 ## Phase 3 — Optional user accounts (last)
 - [ ] `pcn/v1/auth/*` endpoints in the WordPress plugin
-- [ ] Login, registration, password reset, profile
+- [ ] Login, registration, password reset, profile (in the Settings "Cuenta" block)
 - [ ] In-app account deletion (App Store requirement)
 - [ ] Token stored only in Go via `application.Mobile.SecureSet`
 

@@ -7,7 +7,10 @@ Guidance for Claude Code when working in this repository.
 - **Everything that goes to GitHub is in English**: commit messages, PR titles
   and descriptions, issues, review comments, code comments and docs in this
   repo.
-- **App UI text is Spanish** and lives only in `frontend/src/i18n/es.ts`.
+- **App UI text is Spanish (default) and Galician**, chosen in Settings
+  (defaults to the device language). Strings live only in
+  `frontend/src/i18n/es.ts` and `gl.ts`; every key must exist in both (the
+  `Strings` type enforces it). Never hard-code UI text in HTML or TS.
 - Post content comes from pontecesures.net in Galician; do not translate it.
   Section names are shown exactly as the site names them.
 
@@ -18,6 +21,7 @@ the public content of pontecesures.net (WordPress). See `README.md`,
 `docs/DEVELOPMENT.md` and `docs/ROADMAP.md`.
 
 - Go backend: `main.go`, `contentservice.go`, `weatherservice.go`,
+  `settingsservice.go`, `internal/settings/` (display preferences),
   `internal/wp/` (WordPress), `internal/meteo/` (MeteoGalicia),
   `internal/cache/` (offline file cache)
 - Frontend: `frontend/` — Vite + TypeScript + **Alpine.js + Tailwind CSS v4**

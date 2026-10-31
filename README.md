@@ -5,8 +5,8 @@ local news site of Pontecesures (Galicia) since 2005. Built with
 [Wails v3](https://wails.io) — a Go backend plus a web frontend rendered in the
 native WebView — so the same codebase also runs on desktop.
 
-The app UI is in **Spanish**; news content comes from the site as-is (in
-Galician).
+The app UI is available in **Spanish and Galician** (chosen in Settings,
+defaulting to the device language); news content comes from the site as-is.
 
 ## Features
 
@@ -18,6 +18,8 @@ Galician).
 - Related posts under each article ("Más sobre esto")
 - Weather for Pontecesures from MeteoGalicia: a discreet line on the front
   page and a forecast view (today by time slot, next days, warnings)
+- Settings: language (Spanish/Galician), light/dark/automatic theme and text
+  size; the account block will host the profile once accounts exist
 - Native share sheet on mobile (copies the link on desktop)
 - Offline reading of anything already loaded (file cache)
 - Light & dark themes using the website's design tokens
@@ -65,7 +67,7 @@ internal/wp/          WordPress client, HTML sanitising, image cascade, related
 internal/meteo/       MeteoGalicia forecast client
 internal/cache/       File cache for offline reading
 frontend/             Vite + Alpine.js + Tailwind UI
-  src/i18n/es.ts      All UI strings (Spanish)
+  src/i18n/           UI strings: es.ts (Spanish), gl.ts (Galician)
   bindings/           Generated Go → TS bindings (do not edit)
 build/                Wails platform projects (iOS, Android, desktop)
 wordpress-plugin/     Optional pcn/v1 REST endpoints for the site
