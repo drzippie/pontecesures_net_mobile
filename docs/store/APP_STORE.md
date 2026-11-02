@@ -104,14 +104,38 @@ ID linked to the user, for app functionality).
 
 - Sign-in required: **No**.
 - Contact: Antonio Cortés, antonio@antoniocortes.com.
-- Notes for the reviewer (English):
+- Notes for the reviewer (English). Version 1.0 got a Guideline 2.1
+  "Information Needed" request (2026-11-02, new developer account); this
+  text answers it and must also stay in the Notes field. Attach a screen
+  recording made on a physical iPhone (see below) to the reply.
 
 ```
-Pontecesures.net is the local news site of Pontecesures (Galicia, Spain), run by the developer since 2005. This app is its official mobile client.
+1. Screen recording
+Attached: a recording made on an iPhone 15 Pro running the latest iOS. It starts by launching the app from the Home Screen and shows the typical flow: front page, opening an article, the full-screen image viewer, related articles, sections, search, the weather forecast, saving an article and reading it offline, and the settings (language, theme, text size). The app has no account registration or login, no user-generated content and no paid content or features.
 
-The app is not a wrapped website: content is fetched from the site's public WordPress REST API and rendered natively in the app's own interface (front page, sections, search, related articles). It adds features the website does not have: saved articles and offline reading, a full weather forecast from MeteoGalicia (the Galician public weather service), an image viewer with zoom, and Spanish/Galician interface languages.
+2. Purpose and target audience
+Pontecesures.net is the local news site of Pontecesures, a small town in Galicia (Spain), run by the developer since 2005. This app is its official mobile client. It is aimed at residents of Pontecesures and nearby towns, and at people from the area living elsewhere, who want to follow local news (town council, festivities, culture, sports, community life) and the local weather. It provides a faster and more readable way to follow the site than the mobile website: native navigation, search across about 30,000 articles, saved articles and offline reading, a full weather forecast for the town, and a Spanish or Galician interface.
 
-No account or login is needed. The app does not collect personal data, has no ads and no tracking. Articles are published in Galician.
+3. Setup and access
+No setup, account or login is required: all features are available as soon as the app opens.
+- Front page: latest articles; the chips at the top filter by section. Pull down to refresh.
+- Article: tap any article. Tap an image to open it full screen (pinch or double tap to zoom). Related articles appear at the end. The bookmark icon saves the article; the share icon opens the share sheet.
+- Weather: tap the weather line at the top of the front page for the forecast (today by time of day, next days, warnings).
+- Sections and search: "Secciones" and "Buscar" in the bottom tab bar. Search can be sorted by relevance or date and limited to a section.
+- Saved articles: "Más" tab > "Guardadas"; they can be read without a connection (try airplane mode).
+- Settings: "Más" tab > "Ajustes": language (Spanish/Galician), theme and text size.
+
+4. External services
+- pontecesures.net: the developer's own WordPress site. The app reads its public WordPress REST API (articles, sections, search) and loads article images from it.
+- MeteoGalicia (servizos.meteogalicia.gal and www.meteogalicia.gal), the public weather service of the Galician Government: town forecast and weather icons, from its public open-data service.
+- YouTube thumbnails (i.ytimg.com) when an article contains a video; the video itself opens in Safari or the YouTube app.
+No authentication, payment, analytics, advertising or AI services are used.
+
+5. Regional differences
+None. The app works the same in every region. Its content is about Pontecesures and is published in Galician; the interface is in Spanish or Galician (Spanish by default unless the device prefers Galician).
+
+6. Regulated industry / third-party material
+The app does not operate in a regulated industry. The news content and images belong to pontecesures.net, which the developer owns and has run since 2005; the app and the site are by the same developer (Antonio Cortés). Weather data comes from MeteoGalicia's public open-data service and is credited in the app. Articles are shown as published on the site.
 ```
 
 ## Privacy policy
