@@ -93,6 +93,15 @@ tasks:
             export GOARCH=arm64
             JNI_DIR="arm64-v8a"
             ;;
+          arm|armv7|armeabi-v7a)
+            # 32-bit ARM: Android Go edition phones (e.g. Redmi A1) run a
+            # 32-bit userspace even on 64-bit CPUs.
+            export CC="$TOOLCHAIN/bin/armv7a-linux-androideabi{{.MIN_SDK}}-clang"
+            export CXX="$TOOLCHAIN/bin/armv7a-linux-androideabi{{.MIN_SDK}}-clang++"
+            export GOARCH=arm
+            export GOARM=7
+            JNI_DIR="armeabi-v7a"
+            ;;
           amd64|x86_64)
             export CC="$TOOLCHAIN/bin/x86_64-linux-android{{.MIN_SDK}}-clang"
             export CXX="$TOOLCHAIN/bin/x86_64-linux-android{{.MIN_SDK}}-clang++"
@@ -124,6 +133,9 @@ tasks:
           ARCH: arm64
       - task: compile:go:shared
         vars:
+          ARCH: arm
+      - task: compile:go:shared
+        vars:
           ARCH: amd64
 
   package:
@@ -147,6 +159,10 @@ tasks:
           PRODUCTION: "true"
           ARCH: arm64
     cmds:
+      - task: compile:go:shared
+        vars:
+          ARCH: arm
+          PRODUCTION: "true"
       - task: compile:go:shared
         vars:
           ARCH: amd64
@@ -174,6 +190,10 @@ tasks:
           PRODUCTION: "true"
           ARCH: arm64
     cmds:
+      - task: compile:go:shared
+        vars:
+          ARCH: arm
+          PRODUCTION: "true"
       - task: compile:go:shared
         vars:
           ARCH: amd64

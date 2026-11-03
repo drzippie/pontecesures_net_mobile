@@ -182,7 +182,9 @@ the `.ipa` into Apple's Transporter app.
 wails3 task store:android         # signed .aab at bin/pontecesures-net-mobile.aab
 ```
 
-The bundle holds production `libwails.so` builds for arm64-v8a and x86_64
+The bundle holds production `libwails.so` builds for arm64-v8a, armeabi-v7a
+(32-bit ARM: Android Go edition phones such as the Redmi A1 run a 32-bit
+userspace and Play lists the app as incompatible without it) and x86_64
 and is signed with the **upload key**; with Play App Signing, Google
 re-signs it with the app signing key it keeps. Versioning works as in
 `store:ios` (patch bump by default, `versionCode` +1); commit afterwards.
