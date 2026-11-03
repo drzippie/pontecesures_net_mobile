@@ -14,7 +14,7 @@
 - **iOS**: macOS with full Xcode *and an iOS Simulator runtime*
   (`xcodebuild -downloadPlatform iOS`, ~8 GB). `xcrun simctl list runtimes`
   must list an iOS runtime or `ios:run` fails with `Invalid runtime`.
-- **Android**: SDK platform 36, build-tools 36, NDK `26.3.11579264`, an
+- **Android**: minSdk 24 (Play Protect requires it), SDK platform 36, build-tools 36, NDK `26.3.11579264`, an
   emulator image and JDK 21. Set `ANDROID_HOME` and `JAVA_HOME`.
 
 Run `wails3 doctor` to check everything.
