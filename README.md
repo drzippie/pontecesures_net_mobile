@@ -47,7 +47,7 @@ User accounts (optional login and registration) are planned for a later phase
 
 | Layer | Tech |
 | --- | --- |
-| Shell | Wails v3.0.0 (mobile support is **experimental** upstream) |
+| Shell | Wails v3.1.0 (mobile support is **experimental** upstream) |
 | Backend | Go 1.26+, WordPress REST API client in `internal/wp` |
 | Frontend | Vite + TypeScript, Alpine.js, Tailwind CSS v4 |
 | Server side | Optional WordPress plugin in `wordpress-plugin/pcn-mobile` |
@@ -58,7 +58,7 @@ Prerequisites: Go 1.26+, Node 24 (see `.nvmrc`), the `wails3` CLI and the
 mobile toolchains you need.
 
 ```bash
-go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0
+go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
 wails3 doctor
 ```
 

@@ -19,7 +19,7 @@ vars:
   IOS_TARGET: 'arm64-apple-ios{{.MIN_IOS_VERSION}}{{if ne .IOS_PLATFORM "device"}}-simulator{{end}}'
   # SDK version recorded in the linked executable (LC_BUILD_VERSION).
   # iOS 27 refuses to launch apps linked against the iOS 27 SDK that do not
-  # use the UIScene lifecycle, and Wails v3.0.0 still uses the legacy
+  # use the UIScene lifecycle, and Wails v3.1.0 still uses the legacy
   # UIApplicationDelegate window. Declaring SDK 26 keeps the legacy lifecycle
   # working. Remove once Wails adopts UIScene (and before Apple requires the
   # iOS 27 SDK for App Store uploads).

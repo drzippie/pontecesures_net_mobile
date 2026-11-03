@@ -16,7 +16,7 @@ Guidance for Claude Code when working in this repository.
 
 ## Project
 
-Wails v3 (v3.0.0, mobile support experimental) app for iOS/Android that shows
+Wails v3 (v3.1.0, mobile support experimental) app for iOS/Android that shows
 the public content of pontecesures.net (WordPress). See `README.md`,
 `docs/DEVELOPMENT.md` and `docs/ROADMAP.md`.
 
@@ -42,7 +42,7 @@ the public content of pontecesures.net (WordPress). See `README.md`,
 - Platform-specific Go code goes behind `//go:build ios` / `//go:build android`
   (`ios` implies `darwin`, `android` implies `linux`). Prefer
   `application.Mobile` / `application.System.IsMobile()` in shared code.
-- Pin Wails to `v3.0.0` (CLI, `go.mod`, `@wailsio/runtime`). No nightlies.
+- Pin Wails to `v3.1.0` (CLI, `go.mod`, `@wailsio/runtime`). No nightlies.
 - Do not edit generated files: `frontend/bindings/`, `build/ios/xcode/`,
   `build/android/gen/`.
 

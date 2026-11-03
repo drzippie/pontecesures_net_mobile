@@ -62,7 +62,7 @@ applyPrefs(initialPrefs);
  */
 async function applyAndroidSafeArea() {
   // System.IsAndroid() is not reliable here: window._wails.environment is
-  // not populated in the Android WebView (Wails v3.0.0).
+  // not populated in the Android WebView (Wails v3.1.0).
   if (!/\bAndroid\b/.test(navigator.userAgent)) return;
   try {
     const sa = await ContentService.SafeArea();

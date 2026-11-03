@@ -76,7 +76,7 @@ tasks:
 
       Uses the Wails device packaging (ios:package IOS_PLATFORM=device), which
       links the Go archive with -force_load and embeds icons and the launch
-      screen. The generated Xcode project is not used: in Wails v3.0.0 it
+      screen. The generated Xcode project is not used: in Wails v3.1.0 it
       disables signing, names the executable "wailsapp" while PRODUCT_NAME
       differs, does not force-load WailsAppDelegate and needs `go` in Xcode's
       PATH.

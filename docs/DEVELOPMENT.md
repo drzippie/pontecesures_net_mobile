@@ -3,8 +3,14 @@
 ## Toolchains
 
 - **Go** 1.26+ and **Node** 24 (`nvm use`). Vite 8 needs Node ≥ 20.19.
-- **wails3** `v3.0.0` — keep the CLI, `go.mod` and `@wailsio/runtime` on the
+- **wails3** `v3.1.0` — keep the CLI, `go.mod` and `@wailsio/runtime` on the
   same version. Do not use nightlies: mobile support is experimental.
+  v3.1.0's experimental "Wake" build system (`wails.yaml`, enabled with
+  `WAILS_EXP_USE_WAKE=1`) is not used: the migration is one-way and the
+  project relies on custom Taskfile tasks (`device:ios`, `store:ios`).
+  The v3.1.0 Android templates moved to AGP 9 and SDK 36 and add live reload
+  against the dev server; this project keeps its own Gradle files (SDK 35)
+  until the Google Play work, which will need target SDK 36.
 - **iOS**: macOS with full Xcode *and an iOS Simulator runtime*
   (`xcodebuild -downloadPlatform iOS`, ~8 GB). `xcrun simctl list runtimes`
   must list an iOS runtime or `ios:run` fails with `Invalid runtime`.
@@ -29,7 +35,7 @@ sdkmanager --sdk_root="$ANDROID_HOME" "cmdline-tools;latest" "platform-tools" \
 avdmanager create avd --name wails --package "system-images;android-35;google_apis;arm64-v8a" --device pixel_7
 ```
 
-## Platform quirks (Wails v3.0.0)
+## Platform quirks (Wails v3.1.0)
 
 - **iOS executable name.** `CFBundleExecutable` in `build/ios/Info*.plist`
   must match the Taskfile binary name (`pontecesures-net-mobile`, with
@@ -96,7 +102,7 @@ keychain. `scripts/ios_signing.py` picks the identity the profile allows and
 derives the entitlements (the account's App ID prefix, `3W5LP84889`, differs
 from the team id `MA8KEHHSX2`).
 
-Lessons learned (Wails v3.0.0, Xcode 27, iOS 27):
+Lessons learned (Wails v3.0.0–v3.1.0, Xcode 27, iOS 27):
 
 - **iOS 27 requires the UIScene lifecycle** for apps linked against the
   iOS 27 SDK; Wails still uses the legacy app-delegate window, so the app
