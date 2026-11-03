@@ -3,19 +3,19 @@ plugins {
 }
 
 android {
-    namespace 'com.wails.app'
-    compileSdk 35
+    namespace = 'com.wails.app'
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
     }
 
     defaultConfig {
-        applicationId "net.pontecesures.app"
-        minSdk 21
-        targetSdk 35
-        versionCode 4
-        versionName "1.0.0"
+        applicationId = "net.pontecesures.app"
+        minSdk = 21
+        targetSdk = 36
+        versionCode = 4
+        versionName = "1.0.0"
 
         // Configure supported ABIs
         ndk {
@@ -32,10 +32,10 @@ android {
         // be installed for testing (not suitable for Play Store uploads).
         release {
             if (hasKeystore) {
-                storeFile file(keystoreFile)
-                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("ANDROID_KEY_ALIAS")
-                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
             }
         }
     }
@@ -44,13 +44,13 @@ android {
         release {
             // R8 code shrinking + resource shrinking (~half the APK size).
             // Keep rules for the Go/JS bridges live in proguard-rules.pro.
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig hasKeystore ? signingConfigs.release : signingConfigs.debug
+            signingConfig = hasKeystore ? signingConfigs.release : signingConfigs.debug
         }
         debug {
-            debuggable true
+            debuggable = true
         }
     }
 

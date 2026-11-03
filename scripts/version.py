@@ -27,7 +27,7 @@ TARGETS = [
     ("build/ios/Info.plist", r"(<key>CFBundleVersion</key>\s*<string>)(" + SEMVER + r")(</string>)", r"\g<1>{v}\g<3>"),
     ("build/ios/Info.dev.plist", r"(<key>CFBundleShortVersionString</key>\s*<string>)(" + SEMVER + r")(-dev</string>)", r"\g<1>{v}\g<3>"),
     ("build/ios/Info.dev.plist", r"(<key>CFBundleVersion</key>\s*<string>)(" + SEMVER + r")(</string>)", r"\g<1>{v}\g<3>"),
-    ("build/android/app/build.gradle", r'(versionName ")(' + SEMVER + r')(")', r"\g<1>{v}\g<3>"),
+    ("build/android/app/build.gradle", r'(versionName = ")(' + SEMVER + r')(")', r"\g<1>{v}\g<3>"),
     ("main.go", r'(const appVersion = ")(' + SEMVER + r')(")', r"\g<1>{v}\g<3>"),
     ("frontend/src/main.ts", r'(const APP_VERSION = ")(' + SEMVER + r')(")', r"\g<1>{v}\g<3>"),
 ]
@@ -53,7 +53,7 @@ def write(version):
         path.write_text(new)
     gradle = ROOT / "build/android/app/build.gradle"
     text = gradle.read_text()
-    text = re.sub(r"(versionCode )(\d+)", lambda m: f"{m.group(1)}{int(m.group(2)) + 1}", text, count=1)
+    text = re.sub(r"(versionCode = )(\d+)", lambda m: f"{m.group(1)}{int(m.group(2)) + 1}", text, count=1)
     gradle.write_text(text)
     return version
 

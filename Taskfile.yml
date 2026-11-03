@@ -156,6 +156,52 @@ tasks:
       - codesign --verify --deep --strict "{{.BIN_DIR}}/{{.APP_NAME}}.app"
       - echo "Version $(python3 scripts/version.py get) ({{.BUILD_NUMBER}}) ready at {{.BIN_DIR}}/{{.APP_NAME}}.ipa"
 
+  store:android:
+    summary: Builds the Google Play .aab (upload-key signing, arm64 + x86_64)
+    desc: |
+      Usage: wails3 task store:android [BUMP=patch|minor|major|none]
+             [APP_VERSION=X.Y.Z]
+
+      Production App Bundle for Google Play, signed with the UPLOAD key
+      (Play App Signing re-signs it with the app signing key Google keeps).
+      Versioning works as in store:ios; every change also increments the
+      Android versionCode. Commit the version change afterwards.
+
+      The upload keystore defaults to
+      ~/.config/pontecesures-net-mobile/upload-keystore.jks with key alias
+      "upload" (override with ANDROID_KEYSTORE_FILE / ANDROID_KEY_ALIAS). Its
+      password comes from ANDROID_KEYSTORE_PASSWORD or, if unset, from the
+      macOS keychain item "pontecesures-android-upload". The keystore is a
+      PKCS12 file, so the key password is the store password.
+      See docs/DEVELOPMENT.md (Google Play section).
+    vars:
+      BUMP: '{{.BUMP | default "patch"}}'
+      APP_VERSION: '{{.APP_VERSION | default ""}}'
+    env:
+      ANDROID_KEYSTORE_FILE:
+        sh: echo "${ANDROID_KEYSTORE_FILE:-$HOME/.config/pontecesures-net-mobile/upload-keystore.jks}"
+      ANDROID_KEY_ALIAS:
+        sh: echo "${ANDROID_KEY_ALIAS:-upload}"
+    preconditions:
+      - sh: test -f "${ANDROID_KEYSTORE_FILE:-$HOME/.config/pontecesures-net-mobile/upload-keystore.jks}"
+        msg: "Upload keystore not found. See docs/DEVELOPMENT.md (Google Play section)."
+      - sh: test -n "$ANDROID_KEYSTORE_PASSWORD" || security find-generic-password -s pontecesures-android-upload -w >/dev/null 2>&1
+        msg: "Set ANDROID_KEYSTORE_PASSWORD or add the keychain item pontecesures-android-upload."
+    cmds:
+      - |
+        {{if .APP_VERSION}}python3 scripts/version.py set {{.APP_VERSION}}{{else if ne .BUMP "none"}}python3 scripts/version.py bump {{.BUMP}}{{else}}python3 scripts/version.py get{{end}}
+      - |
+        export ANDROID_KEYSTORE_PASSWORD="${ANDROID_KEYSTORE_PASSWORD:-$(security find-generic-password -s pontecesures-android-upload -w)}"
+        export ANDROID_KEY_PASSWORD="${ANDROID_KEY_PASSWORD:-$ANDROID_KEYSTORE_PASSWORD}"
+        wails3 task android:bundle:fat
+      - |
+        # Refuse a debug-signed bundle: Google Play rejects it.
+        if jarsigner -verify -verbose:summary "{{.BIN_DIR}}/{{.APP_NAME}}.aab" | grep -q "CN=Android Debug"; then
+          echo "ERROR: the bundle is signed with the debug keystore"; exit 1
+        fi
+        jarsigner -verify "{{.BIN_DIR}}/{{.APP_NAME}}.aab"
+      - echo "Version $(python3 scripts/version.py get) (versionCode $(sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' build/android/app/build.gradle)) ready at {{.BIN_DIR}}/{{.APP_NAME}}.aab"
+
   store:ios:upload:
     summary: Validates and uploads bin/<app>.ipa to App Store Connect (TestFlight)
     desc: |

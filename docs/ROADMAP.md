@@ -28,6 +28,7 @@
 
 ## Phase 2 — Store release
 - [x] iOS distribution signing and App Store build (`wails3 task store:ios`)
+- [x] Android target SDK 36, trimmed permissions and Play build (`wails3 task store:android`)
 - [ ] Android upload keystore
 - [ ] TestFlight and Google Play internal testing
 - [x] App Store listing draft and screenshots (`docs/store/APP_STORE.md`)

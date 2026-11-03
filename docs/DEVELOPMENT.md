@@ -8,13 +8,13 @@
   v3.1.0's experimental "Wake" build system (`wails.yaml`, enabled with
   `WAILS_EXP_USE_WAKE=1`) is not used: the migration is one-way and the
   project relies on custom Taskfile tasks (`device:ios`, `store:ios`).
-  The v3.1.0 Android templates moved to AGP 9 and SDK 36 and add live reload
-  against the dev server; this project keeps its own Gradle files (SDK 35)
-  until the Google Play work, which will need target SDK 36.
+  The Android project follows the v3.1.0 templates' AGP 9 and SDK 36 (Google
+  Play requires target SDK 36 since 31 August 2026) but not their dev-server
+  live reload.
 - **iOS**: macOS with full Xcode *and an iOS Simulator runtime*
   (`xcodebuild -downloadPlatform iOS`, ~8 GB). `xcrun simctl list runtimes`
   must list an iOS runtime or `ios:run` fails with `Invalid runtime`.
-- **Android**: SDK platform 35, build-tools 35, NDK `26.3.11579264`, an
+- **Android**: SDK platform 36, build-tools 36, NDK `26.3.11579264`, an
   emulator image and JDK 21. Set `ANDROID_HOME` and `JAVA_HOME`.
 
 Run `wails3 doctor` to check everything.
@@ -175,6 +175,46 @@ requests those permissions).
 Uploading: `store:ios:upload` needs `ASC_KEY_ID`, `ASC_ISSUER_ID` and
 `~/.appstoreconnect/private_keys/AuthKey_<ASC_KEY_ID>.p8`; alternatively drag
 the `.ipa` into Apple's Transporter app.
+
+## Google Play builds
+
+```bash
+wails3 task store:android         # signed .aab at bin/pontecesures-net-mobile.aab
+```
+
+The bundle holds production `libwails.so` builds for arm64-v8a and x86_64
+and is signed with the **upload key**; with Play App Signing, Google
+re-signs it with the app signing key it keeps. Versioning works as in
+`store:ios` (patch bump by default, `versionCode` +1); commit afterwards.
+Upload the `.aab` in Play Console (Test and release > the track > Create new
+release).
+
+Upload keystore (one-off; keep a backup outside this machine, a lost upload
+key can be reset from Play Console but it takes days):
+
+```bash
+mkdir -p ~/.config/pontecesures-net-mobile
+keytool -genkeypair -keystore ~/.config/pontecesures-net-mobile/upload-keystore.jks \
+  -storetype PKCS12 -alias upload -keyalg RSA -keysize 4096 -validity 10000 \
+  -dname "CN=Antonio Cortés (DrZippie), O=Pontecesures.net, C=ES"
+security add-generic-password -s pontecesures-android-upload -a upload -w
+```
+
+`store:android` reads the password from `ANDROID_KEYSTORE_PASSWORD` or that
+keychain item, and refuses a bundle signed with the debug keystore.
+
+Notes:
+
+- `build/android/Taskfile.yml` passes `PRODUCTION` from `build` to
+  `compile:go:shared`. Without it (Wails v3.1.0 template) `bundle:fat` and
+  `package` shipped a *debug* `libwails.so` for arm64, the architecture
+  real phones use. Check with `go version -m` on the extracted library.
+- The manifest removes the permissions of Wails features the app never
+  calls (location, camera, biometrics, notifications, foreground service)
+  with `tools:node="remove"`, so Play Console asks for no permission
+  declarations. The app keeps INTERNET, ACCESS_NETWORK_STATE and VIBRATE.
+- Test on a phone with `wails3 task android:run:device` (debug build, USB
+  debugging on; `adb devices` must list the phone).
 
 ## Debugging
 
