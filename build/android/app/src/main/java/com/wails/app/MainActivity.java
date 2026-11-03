@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        enableEdgeToEdge();
         setContentView(R.layout.activity_main);
 
         // Initialize the native Go library
@@ -259,6 +260,24 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    /**
+     * Draws the WebView behind the status and navigation bars on every
+     * Android version. Android 15+ (target SDK 35+) enforces this; older
+     * versions laid the WebView out between the bars, so the frontend's
+     * safe-area padding (from SafeArea) was added twice there.
+     */
+    private void enableEdgeToEdge() {
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // No translucent scrim behind the 3-button navigation bar: the
+            // app's own tab bar is drawn there.
+            getWindow().setNavigationBarContrastEnforced(false);
+            getWindow().setStatusBarContrastEnforced(false);
+        }
     }
 
     private void loadApplication() {

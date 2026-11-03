@@ -321,6 +321,15 @@ public class WailsBridge {
                 widthPx = metrics.widthPixels;
                 heightPx = metrics.heightPixels;
                 density = metrics.density;
+                // Android 7-10: system bar insets from the decor view (the
+                // window draws edge-to-edge, see MainActivity.enableEdgeToEdge).
+                WindowInsets wi = activity.getWindow().getDecorView().getRootWindowInsets();
+                if (wi != null) {
+                    insetTop = wi.getSystemWindowInsetTop();
+                    insetBottom = wi.getSystemWindowInsetBottom();
+                    insetLeft = wi.getSystemWindowInsetLeft();
+                    insetRight = wi.getSystemWindowInsetRight();
+                }
             }
 
             result.put("widthPx", widthPx);

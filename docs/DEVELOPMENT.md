@@ -215,6 +215,15 @@ Notes:
   calls (location, camera, biometrics, notifications, foreground service)
   with `tools:node="remove"`, so Play Console asks for no permission
   declarations. The app keeps INTERNET, ACCESS_NETWORK_STATE and VIBRATE.
+- `MainActivity.enableEdgeToEdge()` draws the WebView behind the system bars
+  on every Android version, as Android 15+ enforces; without it Android 14
+  and older (e.g. a Redmi A1 with Android 12 Go and 3-button navigation)
+  got the safe-area padding twice. On Android 7–10 the insets come from the
+  decor view's root insets.
+- The UI needs a current Android System WebView (Tailwind CSS v4 targets
+  Chrome 111+). It updates through Google Play on real phones, but the
+  emulator images ship old ones (Android 12 image: WebView 91, unstyled
+  page); use a Google Play image or a recent API level for visual checks.
 - Test on a phone with `wails3 task android:run:device` (debug build, USB
   debugging on; `adb devices` must list the phone).
 
