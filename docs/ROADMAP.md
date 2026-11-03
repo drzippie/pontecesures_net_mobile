@@ -32,6 +32,7 @@
 - [ ] Android upload keystore
 - [ ] TestFlight and Google Play internal testing
 - [x] App Store listing draft and screenshots (`docs/store/APP_STORE.md`)
+- [x] Google Play listing draft, graphics and screenshots (`docs/store/GOOGLE_PLAY.md`)
 - [x] Publish the app privacy policy (https://pontecesures.net/privacidad-app/)
 - [ ] CI builds (GitHub Actions)
 
