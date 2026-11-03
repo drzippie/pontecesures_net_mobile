@@ -222,8 +222,10 @@ Notes:
   decor view's root insets.
 - The UI needs a current Android System WebView (Tailwind CSS v4 targets
   Chrome 111+). It updates through Google Play on real phones, but the
-  emulator images ship old ones (Android 12 image: WebView 91, unstyled
-  page); use a Google Play image or a recent API level for visual checks.
+  emulator images ship old ones (Android 12 image: WebView 91); use a Google
+  Play image or a recent API level for visual checks. Below Chromium 111
+  (`MIN_WEBVIEW` in `frontend/src/lib/webview.ts`) the app does not start
+  Alpine and shows a notice with a button to the WebView's Play Store page.
 - Test on a phone with `wails3 task android:run:device` (debug build, USB
   debugging on; `adb devices` must list the phone).
 

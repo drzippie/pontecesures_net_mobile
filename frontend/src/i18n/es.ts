@@ -159,6 +159,13 @@ export const es = {
     retry: "Reintentar",
   },
 
+  /** Shown instead of the app when Android System WebView is too old. */
+  webview: {
+    title: "Actualiza Android System WebView",
+    body: "Pontecesures.net necesita una versión más reciente de «Android System WebView», el componente de Android que muestra la aplicación (tienes la {version}; hace falta la {min} o posterior). Es gratis y se actualiza desde Google Play. Después, cierra y vuelve a abrir la aplicación.",
+    button: "Abrir en Google Play",
+  },
+
   time: {
     now: "ahora mismo",
   },

@@ -15,6 +15,7 @@ import { href, isInternalPostLink, parseHash, type Route } from "./lib/router";
 import { dayDate, dayLabel, hourMinute, rainMax, skyIcon, skyText, windText } from "./lib/weather";
 import { attachZoom, largestSource } from "./lib/zoom";
 import { attachPullToRefresh, PULL_TRIGGER } from "./lib/pull";
+import { MIN_WEBVIEW, outdatedWebView, showOutdatedWebView, WEBVIEW_STORE_URL } from "./lib/webview";
 
 /** After this long in the background, the app refreshes when it comes back. */
 const RESUME_REFRESH_MS = 15 * 60 * 1000;
@@ -595,7 +596,19 @@ Alpine.data("app", () => ({
 }));
 
 window.Alpine = Alpine;
-Alpine.start();
+
+// An outdated Android WebView cannot render the stylesheet: show how to
+// update it instead of an unstyled app.
+const oldWebView = outdatedWebView();
+if (oldWebView === null) {
+  Alpine.start();
+} else {
+  const s = dictionaries[initialPrefs.language].webview;
+  showOutdatedWebView(
+    { title: s.title, body: fmt(s.body, { version: oldWebView, min: MIN_WEBVIEW }), button: s.button },
+    () => void ContentService.OpenURL(WEBVIEW_STORE_URL).catch(() => (location.href = WEBVIEW_STORE_URL)),
+  );
+}
 
 declare global {
   interface Window {

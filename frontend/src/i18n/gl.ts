@@ -156,6 +156,12 @@ export const gl: Strings = {
     retry: "Tentar de novo",
   },
 
+  webview: {
+    title: "Actualiza Android System WebView",
+    body: "Pontecesures.net necesita unha versión máis recente de «Android System WebView», o compoñente de Android que amosa a aplicación (tes a {version}; cómpre a {min} ou posterior). É de balde e actualízase desde Google Play. Despois, pecha e volve abrir a aplicación.",
+    button: "Abrir en Google Play",
+  },
+
   time: {
     now: "agora mesmo",
   },
