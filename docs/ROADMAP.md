@@ -29,8 +29,10 @@
 ## Phase 2 — Store release
 - [x] iOS distribution signing and App Store build (`wails3 task store:ios`)
 - [x] Android target SDK 36, trimmed permissions and Play build (`wails3 task store:android`)
-- [ ] Android upload keystore
-- [ ] TestFlight and Google Play internal testing
+- [x] Android upload keystore (Play App Signing)
+- [x] TestFlight and Google Play internal testing
+- [x] App Store release 1.0.0 (approved 2026-11-09)
+- [ ] Google Play closed test (12 testers, 14 days), then production
 - [x] App Store listing draft and screenshots (`docs/store/APP_STORE.md`)
 - [x] Google Play listing draft, graphics and screenshots (`docs/store/GOOGLE_PLAY.md`)
 - [x] Publish the app privacy policy (https://pontecesures.net/privacidad-app/)
